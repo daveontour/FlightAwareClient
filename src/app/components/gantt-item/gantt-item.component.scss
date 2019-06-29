@@ -1,0 +1,19 @@
+.ganttItem {
+  position: absolute;
+  background-color: green;
+  height: 10px;
+  top:5px;
+  display: flex;
+  align-items: center
+  }
+
+  .nowIndicator {
+      border-left: 1px red dashed;
+      position: absolute;
+      top: 0px;
+  }
+  .hourIndicator {
+    border-left: 1px lightslategray dashed;
+    position: absolute;
+    top: 0px;
+}
