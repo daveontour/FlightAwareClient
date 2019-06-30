@@ -1,4 +1,4 @@
-import { GlobalsService } from './../services/globals.service';
+import { GlobalsService } from '../services/globals.service';
 import { GanttItemComponent } from './gantt-item/gantt-item.component';
 import { Component, ViewChild, ViewContainerRef, AfterViewInit, ComponentFactoryResolver } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
@@ -10,7 +10,7 @@ import * as moment from 'moment';
     template: `<div style="width:100%; height:100%; position:relative; display:flex; align-items:center; border-left: solid 2px blue;" >
     <template #gantt></template></div>`
 })
-export class TestRendererComponent implements ICellRendererAngularComp, AfterViewInit {
+export class GanttRendererComponent implements ICellRendererAngularComp, AfterViewInit {
     @ViewChild('gantt', { read: ViewContainerRef, static: false }) itemsPt;
     public params: any;
     public html: any;
@@ -48,6 +48,39 @@ export class TestRendererComponent implements ICellRendererAngularComp, AfterVie
                     res = '-';
                 }
 
+                res = res + ' / ' +  this.params.data.Movement.Arrival.Flight.FlightState.AircraftType.AircraftTypeId.AircraftTypeCode.IATA;
+
+                let flightNum = '';
+                try {
+                    flightNum =  this.params.data.Movement.Arrival.Flight.FlightId.AirlineDesignator.IATA +
+                    this.params.data.Movement.Arrival.Flight.FlightId.FlightNumber.content;
+                } catch (ex) {
+                    console.log('Error with Flight number');
+                }
+
+                res = res + ' / ' + flightNum;
+
+                let route = '';
+
+                try {
+
+                    this.params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
+                        route = route + element.AirportCode.IATA + ', ';
+                    });
+
+                } catch (ex) {
+                    console.log('Error with Route number');
+                }
+
+                res = res + ' / ' + route.substring(0, route.length - 2);
+
+                let stand = 'Unassigned';
+                try {
+                    stand = this.params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName;
+                  } catch (e) {
+                    stand = 'Unassigned';
+                  }
+
                 const now = moment();
                 const minutePerPixel = 1000 / 300;
 
@@ -55,9 +88,11 @@ export class TestRendererComponent implements ICellRendererAngularComp, AfterVie
                 const stay = e.diff(s, 'minutes');
 
                 if (s1 < 0) {
-                    newObjRef.setInput(0, stay * minutePerPixel + s1 * minutePerPixel, res, true, false);
+                    newObjRef.setInput(0, stay * minutePerPixel + s1 * minutePerPixel, res, true, false,
+                        this.params.data.Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText, stand);
                 } else {
-                    newObjRef.setInput(s1 * minutePerPixel, stay * minutePerPixel, res, true, false);
+                    newObjRef.setInput(s1 * minutePerPixel, stay * minutePerPixel, res, true, false,
+                        this.params.data.Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText, stand);
                 }
 
             }

@@ -12,6 +12,8 @@ export class GanttItemComponent implements OnInit {
   public isItem  = true;
   public isHourMarker = true;
   public resource: string;
+  public statusText: string;
+  public stand: string;
 
   constructor( private messenger: MessengerService) {
 
@@ -29,13 +31,28 @@ export class GanttItemComponent implements OnInit {
   ngOnInit() {
   }
 
-  setInput(start: number, width: number, resource: string, isItem: boolean, isHourMarker: boolean) {
+  setInput(start: number, width: number, resource: string, isItem: boolean, isHourMarker: boolean, statusText: string, stand: string) {
 
     this.start = start;
     this.width = width;
     this.resource = resource;
     this.isItem = isItem;
     this.isHourMarker = isHourMarker;
+    this.statusText = statusText;
+    this.stand = stand;
+  }
+
+  getClass() {
+
+    if (this.stand.startsWith('Unassigned')) {
+      return 'Unassigned';
+    }
+    if (this.statusText.startsWith('SH')) {
+      return 'SH';
+    }
+    if (this.statusText.startsWith('OB')) {
+      return 'OB';
+    }
   }
 
 }

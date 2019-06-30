@@ -13,7 +13,7 @@ import { SchedTimeRendererComponent } from './components/SchedTimeRenderer.compo
 import { FlightRendererComponent } from './components/FlightRenderer.component';
 import { StandSlotRendererComponent } from './components/StandSlotRenderer.component';
 import { GateSlotRendererComponent } from './components/GateSlotRenderer.component';
-import { TestRendererComponent } from './components/TestRenderer.component';
+import { GanttRendererComponent } from './components/GanttRenderer.component';
 import { GanttItemComponent } from './components/gantt-item/gantt-item.component';
 import { SortableHeaderComponent } from './components/sortable-header/sortable-header.component';
 import { SortableHeaderTimeMarkerComponent } from './components/sortable-header-time-marker/sortable-header-time-marker.component';
@@ -29,7 +29,7 @@ import { GlobalsService } from './services/globals.service';
     LinkedFlightRendererComponent,
     StandSlotRendererComponent,
     GateSlotRendererComponent,
-    TestRendererComponent,
+    GanttRendererComponent,
     GanttItemComponent,
     SortableHeaderComponent,
     SortableHeaderTimeMarkerComponent,
@@ -44,7 +44,7 @@ import { GlobalsService } from './services/globals.service';
       LinkedFlightRendererComponent,
       StandSlotRendererComponent,
       GateSlotRendererComponent,
-      TestRendererComponent,
+      GanttRendererComponent,
       SortableHeaderComponent,
       CallSignRendererComponent
     ])

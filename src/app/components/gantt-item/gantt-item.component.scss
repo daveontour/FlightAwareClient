@@ -1,14 +1,26 @@
 .ganttItem {
   position: absolute;
   background-color: green;
-  height: 10px;
-  top:5px;
+  height: 19px;
+  top:2px;
   display: flex;
   align-items: center
   }
 
+  .SH {
+    background-color: blueviolet
+  }
+
+  .OB {
+    background-color: green;
+  }
+
+  .Unassigned {
+    background: red;
+  }
+
   .nowIndicator {
-      border-left: 1px red dashed;
+      border-left: 2px goldenrod dashed;
       position: absolute;
       top: 0px;
   }

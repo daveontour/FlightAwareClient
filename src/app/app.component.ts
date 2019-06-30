@@ -1,7 +1,7 @@
 import { CallSignRendererComponent } from './components/CallSignRenderer.component';
 
 import { SortableHeaderComponent } from './components/sortable-header/sortable-header.component';
-import { TestRendererComponent } from './components/TestRenderer.component';
+import { GanttRendererComponent } from './components/GanttRenderer.component';
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FlightRendererComponent } from './components/FlightRenderer.component';
@@ -18,7 +18,7 @@ import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr'
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -125,6 +125,13 @@ export class AppComponent implements OnInit {
             sortable: true
           },
           {
+            headerName: 'Route',
+            field: 'Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint',
+            sortable: true,
+            valueGetter: RouteValueGetter,
+            width: 100
+          },
+          {
             headerName: 'Scheduled',
             cellRenderer: 'schedTimeRenderer',
             field: 'Movement.Arrival.Flight.FlightState.ScheduledTime.content',
@@ -163,7 +170,7 @@ export class AppComponent implements OnInit {
         children: [
           {
             field: 'times',
-            cellRenderer: 'testRenderer',
+            cellRenderer: 'ganttRenderer',
             width: 1000,
             headerComponent: 'sortableHeaderComponent'
           }
@@ -195,9 +202,16 @@ export class AppComponent implements OnInit {
             suppressColumnSelectAll: true,
             suppressColumnExpandAll: false
           }
-        }
+        },
+        {
+          id: 'filters',
+          labelDefault: 'Filters',
+          labelKey: 'filters',
+          iconKey: 'filter',
+          toolPanel: 'agFiltersToolPanel',
+      }
       ],
-      defaultToolPanel: 'columns'
+      defaultToolPanel: ''
     };
     this.context = { componentParent: this };
     this.frameworkComponents = {
@@ -206,7 +220,7 @@ export class AppComponent implements OnInit {
       standSlotRenderer: StandSlotRendererComponent,
       gateSlotRenderer: GateSlotRendererComponent,
       linkedflightRenderer: LinkedFlightRendererComponent,
-      testRenderer: TestRendererComponent,
+      ganttRenderer: GanttRendererComponent,
       sortableHeaderComponent: SortableHeaderComponent,
       callSignRenderer: CallSignRendererComponent
     };
@@ -363,5 +377,25 @@ function DateValueGetter(params) {
   } catch (e) {
     console.log('Returning Dummy Value');
     return '1999-06-27T08:35:00';
+  }
+}
+function RouteValueGetter(params) {
+  try {
+
+    let route = '';
+
+    try {
+
+        params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
+            route = route + element.AirportCode.IATA + ', ';
+        });
+
+    } catch (ex) {
+        console.log('Error with Route number');
+    }
+
+    return route.substring(0, route.length - 2);
+  } catch (e) {
+    return '-';
   }
 }

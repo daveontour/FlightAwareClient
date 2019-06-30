@@ -1,7 +1,7 @@
 
 <div *ngIf="this.isItem; then allocationBlock; else nowBlock"></div>
 <ng-template #allocationBlock>
-  <div class="ganttItem" [ngStyle]="{'left.px':start, 'width.px':width}">&nbsp;<span style="margin-left: 10px">{{resource}}</span></div>
+  <div class="ganttItem" [ngClass] = "getClass()" [ngStyle]="{'left.px':start, 'width.px':width}">&nbsp;<span style="margin-left: 10px">{{resource}}</span></div>
 </ng-template>
 <ng-template #nowBlock>
   <div [ngClass] = "{'nowIndicator': !isHourMarker, 'hourIndicator':isHourMarker}"  [ngStyle]="{'left.px':start}">&nbsp;</div>
