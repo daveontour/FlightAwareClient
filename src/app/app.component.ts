@@ -127,8 +127,10 @@ export class AppComponent implements OnInit {
           {
             headerName: 'Scheduled',
             cellRenderer: 'schedTimeRenderer',
+            field: 'Movement.Arrival.Flight.FlightState.ScheduledTime.content',
             sortable: true,
             width: 120,
+            enableCellChangeFlash: true,
             cellRendererParams: {
               type: 'arrival'
             },
@@ -139,6 +141,7 @@ export class AppComponent implements OnInit {
             sortable: true,
             width: 80,
             valueGetter: ActualValueGetter,
+            enableCellChangeFlash: true,
           },
           {
             headerName: 'Most Confident',
@@ -150,7 +153,8 @@ export class AppComponent implements OnInit {
             comparator: DateComparator,
             valueGetter: DateValueGetter,
             sort: 'asc',
-            unSortIcon: true
+            unSortIcon: true,
+            enableCellChangeFlash: true,
           },
         ]
       },
@@ -243,31 +247,19 @@ export class AppComponent implements OnInit {
       });
 
       that.stompClient.subscribe('/add', (message) => {
-        const newFlight = JSON.parse(message.body);
-        try {
-          newFlight.times = {
-            start: newFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
-            end: newFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
-          };
-        } catch (ex) {
-          newFlight.times = { start: '-', end: '-' };
-        }
-        const itemsToUpdate = [];
-        itemsToUpdate.push(newFlight);
-        console.log('Add New Flight');
-        console.log(newFlight);
-        that.gridApi.updateRowData({ add: itemsToUpdate });
-        that.director.updateNowIndicator();
+        const addFlight = JSON.parse(message.body);
+        const itemsToAdd  = [addFlight];
+        console.log('Add Movement');
+        console.log(addFlight);
+        that.gridApi.updateRowData({ add: itemsToAdd });
       });
 
       that.stompClient.subscribe('/delete', (message) => {
-        const deleteFlight = JSON.parse(message.body);
-        const itemsToUpdate = [];
-        itemsToUpdate.push(deleteFlight);
-        console.log('Delete Flight');
-        console.log(deleteFlight);
-        that.gridApi.updateRowData({ remove: itemsToUpdate });
-        that.director.updateNowIndicator();
+        const removeFlight = JSON.parse(message.body);
+        const itemsToRemove = [removeFlight];
+        console.log('Remove Movement');
+        console.log(removeFlight);
+        that.gridApi.updateRowData({ remove: itemsToRemove });
       });
     });
   }
@@ -276,14 +268,13 @@ export class AppComponent implements OnInit {
     const that = this;
 
     const rowsToAdd = [];
-    this.http.get<any>('http://localhost:8080/getMovements?from=-240&to=300&timetype=mco').subscribe(data => {
+    this.http.get<any>('http://localhost:8080/getMovements?from=-240&to=240&timetype=mco').subscribe(data => {
       data.forEach(element => {
 
         try {
           element.times = {
             start: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
             end: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
-            stand: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName
           };
           rowsToAdd.push(element);
         } catch (ex) {
