@@ -1,9 +1,10 @@
-
-<h1>Arriving Flights</h1> 
+<div style="height:45px; align-items: center;display: grid">
+<h1 style="margin: initial">Arriving Flights</h1>
+</div> 
 
 <ag-grid-angular 
     #agGrid
-    style="width: 100%; height: 700px;" 
+    style="width: 100%; height: calc(100vh - 65px);" 
     id="myGrid"
     class="ag-theme-balham-dark"
     [rowData]="rowData" 
@@ -18,4 +19,11 @@
     (gridReady)="onGridReady($event)"
     >
 </ag-grid-angular>
+<div style="height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px" >STATUS: 
+    <span style="margin-left: 10px" [ngClass] = "status">{{status}}</span>
+    <span style="margin-left: 10px" >Update Mode:</span>
+    <span style="margin-left: 10px" [ngClass] = "updateMode">{{updateMode}}</span>
+    <span style="margin-left: 10px" >Last Update:</span>
+    <span style="margin-left: 10px;color:cadetblue">{{lastUpdate}}</span>
+</div>
 

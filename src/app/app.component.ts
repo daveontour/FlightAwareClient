@@ -18,7 +18,7 @@ import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr'
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -45,6 +45,13 @@ export class AppComponent implements OnInit {
   private serverURL = 'http://localhost:8080/socket';
   private sideBar;
   private defaultColDef;
+
+  private pollTask;
+  private reconnectTask;
+
+  public status = 'Connecting';
+  public updateMode = 'Live';
+  public lastUpdate = '-';
 
   constructor(
     private http: HttpClient,
@@ -209,7 +216,7 @@ export class AppComponent implements OnInit {
           labelKey: 'filters',
           iconKey: 'filter',
           toolPanel: 'agFiltersToolPanel',
-      }
+        }
       ],
       defaultToolPanel: ''
     };
@@ -241,6 +248,8 @@ export class AppComponent implements OnInit {
     const that = this;
     // tslint:disable-next-line:only-arrow-functions
     this.stompClient.connect({}, (frame) => {
+      that.status = 'Connected';
+      console.log('Connected to WS Server');
       that.stompClient.subscribe('/update', (message) => {
         console.log('Update Movement');
         console.log(message);
@@ -258,14 +267,16 @@ export class AppComponent implements OnInit {
         console.log(updatedFlight);
         that.gridApi.updateRowData({ update: itemsToUpdate });
         that.director.updateNowIndicator();
+        that.lastUpdate = moment().format('HH:mm:ss');
       });
 
       that.stompClient.subscribe('/add', (message) => {
         const addFlight = JSON.parse(message.body);
-        const itemsToAdd  = [addFlight];
+        const itemsToAdd = [addFlight];
         console.log('Add Movement');
         console.log(addFlight);
         that.gridApi.updateRowData({ add: itemsToAdd });
+        that.lastUpdate = moment().format('HH:mm:ss');
       });
 
       that.stompClient.subscribe('/delete', (message) => {
@@ -274,8 +285,54 @@ export class AppComponent implements OnInit {
         console.log('Remove Movement');
         console.log(removeFlight);
         that.gridApi.updateRowData({ remove: itemsToRemove });
+        that.lastUpdate = moment().format('HH:mm:ss');
       });
-    });
+
+      that.stompClient.subscribe('/updateMode', (message) => {
+
+        if (message.body.includes('Live')) {
+
+          // Clear the refresh timer if it was running
+          try {
+            clearInterval(that.pollTask);
+          } catch (ex) {
+            // Do nothing
+          }
+
+          // Do a refresh first, just in case
+          if (that.updateMode === 'Refresh') {
+            that.ngOnInit();
+          }
+
+          // Set the new mode;
+          that.updateMode = 'Live';
+
+        } else if (message.body.includes('Refresh')) {
+   
+          if (!that.updateMode.includes('Refresh')) {
+            that.ngOnInit();
+            that.updateMode = 'Refresh';
+            that.pollTask = setInterval(() => {
+              that.ngOnInit();
+            }, 60000);
+          }
+        }
+      });
+
+    },
+      (error: string) => {
+
+        console.log(error);
+        if (error.includes('Whoops! Lost connection to')) {
+          that.status = 'Disconnected';
+          setTimeout(() => {
+            console.log('Trying to reconnect');
+            that.status = 'Connecting';
+            that.ngOnInit();
+          }, 5000);
+        }
+      }
+    );
   }
 
   ngOnInit() {
@@ -296,6 +353,7 @@ export class AppComponent implements OnInit {
         }
       });
 
+      that.lastUpdate = moment().format('HH:mm:ss');
 
       that.rowData = rowsToAdd;
     });
@@ -303,9 +361,9 @@ export class AppComponent implements OnInit {
     this.initializeWebSocketConnection();
 
     // Do  a refresh every 5 minutes
-    setTimeout(() => {
-      that.ngOnInit();
-    }, 5 * 60000);
+    // setTimeout(() => {
+    //   that.ngOnInit();
+    // }, 5 * 60000);
   }
 
   onGridReady(params) {
@@ -386,12 +444,12 @@ function RouteValueGetter(params) {
 
     try {
 
-        params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
-            route = route + element.AirportCode.IATA + ', ';
-        });
+      params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
+        route = route + element.AirportCode.IATA + ', ';
+      });
 
     } catch (ex) {
-        console.log('Error with Route number');
+      console.log('Error with Route number');
     }
 
     return route.substring(0, route.length - 2);

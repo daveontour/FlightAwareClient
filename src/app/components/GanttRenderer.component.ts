@@ -44,7 +44,7 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
 
                     res = this.params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName;
                 } catch (ex) {
-                    console.log(ex);
+                  //  console.log(ex);
                     res = '-';
                 }
 
