@@ -1,7 +1,7 @@
 import { CallSignRendererComponent } from './components/CallSignRenderer.component';
 
 import { SortableHeaderComponent } from './components/sortable-header/sortable-header.component';
-import { GanttRendererComponent } from './components/GanttRenderer.component';
+import { GanttRendererComponent } from './components/gantt-item/GanttRenderer.component';
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FlightRendererComponent } from './components/FlightRenderer.component';
@@ -18,7 +18,7 @@ import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr'
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -266,7 +266,7 @@ export class AppComponent implements OnInit {
         itemsToUpdate.push(updatedFlight);
         console.log(updatedFlight);
         that.gridApi.updateRowData({ update: itemsToUpdate });
-        that.director.updateNowIndicator();
+        that.director.minuteTick();
         that.lastUpdate = moment().format('HH:mm:ss');
       });
 
@@ -308,7 +308,7 @@ export class AppComponent implements OnInit {
           that.updateMode = 'Live';
 
         } else if (message.body.includes('Refresh')) {
-   
+
           if (!that.updateMode.includes('Refresh')) {
             that.ngOnInit();
             that.updateMode = 'Refresh';

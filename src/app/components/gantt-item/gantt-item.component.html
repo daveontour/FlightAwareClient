@@ -1,8 +1,39 @@
 
-<div *ngIf="this.isItem; then allocationBlock; else nowBlock"></div>
+<!-- <div *ngIf="this.isItem; then allocationBlock; else nowBlock"></div>
 <ng-template #allocationBlock>
   <div class="ganttItem" [ngClass] = "getClass()" [ngStyle]="{'left.px':start, 'width.px':width}">&nbsp;<span style="margin-left: 10px">{{resource}}</span></div>
 </ng-template>
 <ng-template #nowBlock>
   <div [ngClass] = "{'nowIndicator': !isHourMarker, 'hourIndicator':isHourMarker}"  [ngStyle]="{'left.px':start}">&nbsp;</div>
-</ng-template>
+</ng-template> -->
+
+<div style="width:100%; height:100%; position:relative; display:flex; align-items:center; border-left: solid 2px blue;" >
+  <div class="0Hour hourIndicator">&nbsp;</div>
+  <div class="1Hour hourIndicator">&nbsp;</div>
+  <div class="2Hour hourIndicator">&nbsp;</div>
+  <div class="3Hour hourIndicator">&nbsp;</div>
+  <div class="4Hour hourIndicator">&nbsp;</div>
+  <div class="5Hour hourIndicator">&nbsp;</div>
+  <div class="6Hour hourIndicator">&nbsp;</div>
+  <div class="7Hour hourIndicator">&nbsp;</div>
+  <div class="8Hour hourIndicator">&nbsp;</div>
+  <div class="9Hour hourIndicator">&nbsp;</div>
+  <div class="10Hour hourIndicator">&nbsp;</div>
+  <div class="11Hour hourIndicator">&nbsp;</div>
+  <div class="12Hour hourIndicator">&nbsp;</div>
+  <div class="13Hour hourIndicator">&nbsp;</div>
+  <div class="14Hour hourIndicator">&nbsp;</div>
+  <div class="15Hour hourIndicator">&nbsp;</div>
+  <div class="16Hour hourIndicator">&nbsp;</div>
+  <div class="17Hour hourIndicator">&nbsp;</div>
+  <div class="18Hour hourIndicator">&nbsp;</div>
+  <div class="19Hour hourIndicator">&nbsp;</div>
+  <div class="20Hour hourIndicator">&nbsp;</div>
+  <div class="11Hour hourIndicator">&nbsp;</div>
+  <div class="22Hour hourIndicator">&nbsp;</div>
+  <div class="23Hour hourIndicator">&nbsp;</div>
+ 
+  <div [ngClass] = "getClass()" [ngStyle]="{'left.px':start, 'width.px':width}">{{res}}</div>
+ 
+   <div class="nowIndicator">&nbsp;</div>
+  </div>

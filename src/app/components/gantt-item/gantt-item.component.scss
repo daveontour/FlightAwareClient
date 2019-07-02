@@ -4,7 +4,8 @@
   height: 19px;
   top:2px;
   display: flex;
-  align-items: center
+  align-items: center;
+  z-index: 63000;
   }
 
   .SH {
@@ -23,9 +24,11 @@
       border-left: 2px goldenrod dashed;
       position: absolute;
       top: 0px;
+      z-index: 64000;
   }
   .hourIndicator {
     border-left: 1px lightslategray dashed;
     position: absolute;
     top: 0px;
+    
 }

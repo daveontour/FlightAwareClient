@@ -13,7 +13,7 @@ import { SchedTimeRendererComponent } from './components/SchedTimeRenderer.compo
 import { FlightRendererComponent } from './components/FlightRenderer.component';
 import { StandSlotRendererComponent } from './components/StandSlotRenderer.component';
 import { GateSlotRendererComponent } from './components/GateSlotRenderer.component';
-import { GanttRendererComponent } from './components/GanttRenderer.component';
+import { GanttRendererComponent } from './components/gantt-item/GanttRenderer.component';
 import { GanttItemComponent } from './components/gantt-item/gantt-item.component';
 import { SortableHeaderComponent } from './components/sortable-header/sortable-header.component';
 import { SortableHeaderTimeMarkerComponent } from './components/sortable-header-time-marker/sortable-header-time-marker.component';
