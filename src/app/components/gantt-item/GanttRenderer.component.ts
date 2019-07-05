@@ -73,7 +73,7 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
                 this.res = this.res + ' / ' + route.substring(0, route.length - 2);
 
                 const now = moment();
-                const minutePerPixel = 1000 / 300;
+                const minutePerPixel = this.globals.minutesPerPixel;
 
                 const s1 = s.diff(this.globals.zeroTime, 'minutes');
                 const stay = e.diff(s, 'minutes');

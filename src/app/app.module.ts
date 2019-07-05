@@ -14,12 +14,16 @@ import { FlightRendererComponent } from './components/FlightRenderer.component';
 import { StandSlotRendererComponent } from './components/StandSlotRenderer.component';
 import { GateSlotRendererComponent } from './components/GateSlotRenderer.component';
 import { GanttRendererComponent } from './components/gantt-item/GanttRenderer.component';
-import { GanttItemComponent } from './components/gantt-item/gantt-item.component';
 import { SortableHeaderComponent } from './components/sortable-header/sortable-header.component';
 import { SortableHeaderTimeMarkerComponent } from './components/sortable-header-time-marker/sortable-header-time-marker.component';
 import { GlobalsService } from './services/globals.service';
-// import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
-// import { myRxStompConfig } from './my-rx-stomp.config';
+import {NgxMaterialTimepickerModule} from 'ngx-material-timepicker';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { OwlDateTimeModule, OwlNativeDateTimeModule } from 'ng-pick-datetime';
+import { FormsModule } from '@angular/forms';
+
+
+
 
 @NgModule({
   declarations: [
@@ -30,14 +34,18 @@ import { GlobalsService } from './services/globals.service';
     StandSlotRendererComponent,
     GateSlotRendererComponent,
     GanttRendererComponent,
-    GanttItemComponent,
     SortableHeaderComponent,
     SortableHeaderTimeMarkerComponent,
     CallSignRendererComponent
   ],
   imports: [
     BrowserModule,
+    FormsModule,
+    BrowserAnimationsModule,
+    OwlDateTimeModule,
+    OwlNativeDateTimeModule,
     HttpClientModule,
+    NgxMaterialTimepickerModule,
     AgGridModule.withComponents([
       SchedTimeRendererComponent,
       FlightRendererComponent,
@@ -53,18 +61,8 @@ import { GlobalsService } from './services/globals.service';
     MessengerService,
     DirectorService,
     GlobalsService,
-    // {
-    //   provide: InjectableRxStompConfig,
-    //   useValue: myRxStompConfig
-    // },
-    // {
-    //   provide: RxStompService,
-    //   useFactory: rxStompServiceFactory,
-    //   deps: [InjectableRxStompConfig]
-    // }
   ],
   entryComponents: [
-    GanttItemComponent,
     SortableHeaderTimeMarkerComponent
   ],
   bootstrap: [AppComponent]

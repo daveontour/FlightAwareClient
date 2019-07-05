@@ -16,3 +16,42 @@
 .Refresh {
     color: mediumturquoise
 }
+
+label {
+  margin-left: 5px;
+  margin-right: 3px;
+}
+
+.gridinput {
+  font-family: inherit;
+  width:35px;
+  font-size: 9px;
+  border: 1px solid lightgray;
+  border-radius: 3px;
+  padding-left: 3px;
+}
+button {
+  font-family: inherit;
+  width:35px;
+  font-size: 9px;
+  border: 1px solid lightgray;
+  border-radius: 3px;
+  padding-left: 3px; 
+  margin-left: 5px;
+}
+
+select {
+  font-family: inherit;
+  font-size: 9px;
+  border: 1px solid lightgray;
+  border-radius: 3px;
+  margin-left: 5px;
+}
+
+.hide{
+  display: none
+}
+
+.show {
+  display: inline;
+}

@@ -7,7 +7,9 @@ import * as moment from 'moment';
 export class GlobalsService {
 
   public minutesPerPixel = 1000 / 300;
-  public zeroTime = moment().subtract(90, 'm');
+  public zeroTime = moment().subtract(120, 'm');
+  public rangeMode = 'offset';
+  public offsetFrom: number;
 
   constructor() { }
 }

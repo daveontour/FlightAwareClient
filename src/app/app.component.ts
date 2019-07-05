@@ -1,3 +1,4 @@
+import { GlobalsService } from './services/globals.service';
 import { CallSignRendererComponent } from './components/CallSignRenderer.component';
 
 import { SortableHeaderComponent } from './components/sortable-header/sortable-header.component';
@@ -18,7 +19,7 @@ import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr'
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -49,15 +50,41 @@ export class AppComponent implements OnInit {
   private pollTask;
   private reconnectTask;
 
+  public offsetFrom = -120;
+  public offsetTo = 180;
+
+  public rangeFrom: number;
+  public rangeTo: number;
+  public rangeDate: any;
+
+  public rangeMode = 'offset';
+
+  public dateLoad = new Date();
   public status = 'Connecting';
   public updateMode = 'Live';
   public lastUpdate = '-';
+  public darkTheme = {
+    container: {
+      bodyBackgroundColor: '#424242',
+      buttonColor: '#fff'
+    },
+    dial: {
+      dialBackgroundColor: '#555',
+    },
+    clockFace: {
+      clockFaceBackgroundColor: '#555',
+      clockHandColor: '#9fbd90',
+      clockFaceTimeInactiveColor: '#fff'
+    }
+  };
 
   constructor(
     private http: HttpClient,
     private director: DirectorService,
+    private globals: GlobalsService
   ) {
 
+    this.globals.offsetFrom = this.offsetFrom;
     this.columnDefs = [
       {
         headerName: 'Aircraft',
@@ -249,6 +276,7 @@ export class AppComponent implements OnInit {
     // tslint:disable-next-line:only-arrow-functions
     this.stompClient.connect({}, (frame) => {
       that.status = 'Connected';
+      that.director.minuteTick();
       console.log('Connected to WS Server');
       that.stompClient.subscribe('/update', (message) => {
         console.log('Update Movement');
@@ -339,24 +367,25 @@ export class AppComponent implements OnInit {
     const that = this;
 
     const rowsToAdd = [];
-    this.http.get<any>('http://localhost:8080/getMovements?from=-240&to=240&timetype=mco').subscribe(data => {
-      data.forEach(element => {
+    this.http.get<any>('http://localhost:8080/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
+      '&timetype=mco').subscribe(data => {
+        data.forEach(element => {
 
-        try {
-          element.times = {
-            start: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
-            end: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
-          };
-          rowsToAdd.push(element);
-        } catch (ex) {
-          console.log(ex);
-        }
+          try {
+            element.times = {
+              start: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
+              end: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
+            };
+            rowsToAdd.push(element);
+          } catch (ex) {
+            console.log(ex);
+          }
+        });
+
+        that.lastUpdate = moment().format('HH:mm:ss');
+
+        that.rowData = rowsToAdd;
       });
-
-      that.lastUpdate = moment().format('HH:mm:ss');
-
-      that.rowData = rowsToAdd;
-    });
 
     this.initializeWebSocketConnection();
 
@@ -379,6 +408,60 @@ export class AppComponent implements OnInit {
     this.gridApi.refreshClientSideRowModel('filter');
   }
 
+  setCurrentRange() {
+    this.rangeMode = 'offset';
+    this.globals.offsetFrom = this.offsetFrom;
+    this.globals.zeroTime = moment().add(this.offsetFrom, 'minutes');
+    this.director.minuteTick();
+    this.ngOnInit();
+  }
+
+  zoom(d:number) {
+
+    let x = this.globals.minutesPerPixel;
+    x = x + d * (0.1 * x);
+    this.globals.minutesPerPixel = x;
+    this.director.minuteTick();
+    this.ngOnInit();
+  }
+  setSelectedRange() {
+    this.rangeMode = 'range';
+
+    const mss = this.rangeDate + ' ' + this.rangeFrom;
+    const ms = moment(mss, 'YYYY-MM-DD HH:mm');
+
+    const mse = this.rangeDate + ' ' + this.rangeTo;
+    const me = moment(mse, 'YYYY-MM-DD HH:mm');
+
+    this.offsetFrom = ms.diff(moment(), 'm');
+    this.offsetTo = me.diff(moment(), 'm');
+    this.globals.offsetFrom = this.offsetFrom;
+
+    console.log(this.offsetFrom);
+    console.log(this.offsetTo);
+
+    this.globals.zeroTime = moment().add(this.offsetFrom, 'minutes');
+    this.director.minuteTick();
+
+    this.ngOnInit();
+
+  }
+
+  getOffsetBulletClass() {
+    if (this.rangeMode === 'offset') {
+      return 'show';
+    } else {
+      return 'hide';
+    }
+  }
+
+  getRangeBulletClass() {
+    if (this.rangeMode !== 'offset') {
+      return 'show';
+    } else {
+      return 'hide';
+    }
+  }
 
 
 }

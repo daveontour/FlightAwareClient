@@ -18,7 +18,11 @@ export class DirectorService {
 
     setTimeout(() => {
       that.minuteTick();
-    }, 2000);
+    }, 500);
+
+    setTimeout(() => {
+      that.minuteTick();
+    }, 2500);
 
     setTimeout(() => {
       that.minuteTick();
@@ -28,16 +32,19 @@ export class DirectorService {
     }, sec);
 
 
-    setInterval(() => {
-      that.globals.zeroTime = moment().subtract(90, 'm');
-      that.minuteTick();
-    }, 5 * 60000);
+    // setInterval(() => {
+    //   if (this.globals.rangeMode === 'offet') {
+    //     that.globals.zeroTime = moment().subtract(90, 'm');
+    //   }
+    //   that.minuteTick();
+    // }, 5 * 60000);
   }
 
   public minuteTick() {
 
 
-     // Update the hour markers on the gantt
+    this.globals.zeroTime = moment().add(this.globals.offsetFrom, 'minutes');
+    // Update the hour markers on the gantt
     $('.hourIndicator').css('left', '0px');
 
     // // Hour markers
@@ -62,7 +69,7 @@ export class DirectorService {
     const nowLeft = origin * this.globals.minutesPerPixel;
     $('.nowIndicator').css('left', nowLeft + 'px');
 
-   // The Header timer markers
+    // The Header timer markers
     const scale: TimeScale = {
       left: origin * this.globals.minutesPerPixel
     };
