@@ -19,7 +19,7 @@ import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr'
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -57,7 +57,9 @@ export class AppComponent implements OnInit {
   public rangeTo: number;
   public rangeDate: any;
 
-  public rangeMode = 'offset';
+ public hardReset = '';
+
+ public showOnBlocks = true;
 
   public dateLoad = new Date();
   public status = 'Connecting';
@@ -77,6 +79,7 @@ export class AppComponent implements OnInit {
       clockFaceTimeInactiveColor: '#fff'
     }
   };
+  bigRefresh: any;
 
   constructor(
     private http: HttpClient,
@@ -271,16 +274,12 @@ export class AppComponent implements OnInit {
     const ws = new SockJS(this.serverURL);
     this.stompClient = Stomp.over(ws);
     // Disable console logging
-    // this.stompClient.debug = () => {};
+    this.stompClient.debug = () => {};
     const that = this;
-    // tslint:disable-next-line:only-arrow-functions
     this.stompClient.connect({}, (frame) => {
       that.status = 'Connected';
       that.director.minuteTick();
-      console.log('Connected to WS Server');
       that.stompClient.subscribe('/update', (message) => {
-        console.log('Update Movement');
-        console.log(message);
         const updatedFlight = JSON.parse(message.body);
         try {
           updatedFlight.times = {
@@ -301,8 +300,6 @@ export class AppComponent implements OnInit {
       that.stompClient.subscribe('/add', (message) => {
         const addFlight = JSON.parse(message.body);
         const itemsToAdd = [addFlight];
-        console.log('Add Movement');
-        console.log(addFlight);
         that.gridApi.updateRowData({ add: itemsToAdd });
         that.lastUpdate = moment().format('HH:mm:ss');
       });
@@ -310,8 +307,6 @@ export class AppComponent implements OnInit {
       that.stompClient.subscribe('/delete', (message) => {
         const removeFlight = JSON.parse(message.body);
         const itemsToRemove = [removeFlight];
-        console.log('Remove Movement');
-        console.log(removeFlight);
         that.gridApi.updateRowData({ remove: itemsToRemove });
         that.lastUpdate = moment().format('HH:mm:ss');
       });
@@ -363,12 +358,27 @@ export class AppComponent implements OnInit {
     );
   }
 
+  refresh() {
+    this.hardReset = '&reset=true';
+    this.ngOnInit();
+    this.hardReset = '';
+  }
+
+changeOnBlocks() {
+  alert(this.showOnBlocks);
+}
+
   ngOnInit() {
     const that = this;
 
+    try {
+      this.bigRefresh.cancel();
+    } catch (ex) {
+      // Do Nothing
+    }
     const rowsToAdd = [];
     this.http.get<any>('http://localhost:8080/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
-      '&timetype=mco').subscribe(data => {
+      '&timetype=mco' + that.hardReset).subscribe(data => {
         data.forEach(element => {
 
           try {
@@ -390,9 +400,9 @@ export class AppComponent implements OnInit {
     this.initializeWebSocketConnection();
 
     // Do  a refresh every 5 minutes
-    // setTimeout(() => {
-    //   that.ngOnInit();
-    // }, 5 * 60000);
+    this.bigRefresh = setTimeout(() => {
+      that.ngOnInit();
+    }, 5 * 60000);
   }
 
   onGridReady(params) {
@@ -409,14 +419,14 @@ export class AppComponent implements OnInit {
   }
 
   setCurrentRange() {
-    this.rangeMode = 'offset';
+    this.globals.rangeMode = 'offset';
     this.globals.offsetFrom = this.offsetFrom;
     this.globals.zeroTime = moment().add(this.offsetFrom, 'minutes');
     this.director.minuteTick();
     this.ngOnInit();
   }
 
-  zoom(d:number) {
+  zoom(d: number) {
 
     let x = this.globals.minutesPerPixel;
     x = x + d * (0.1 * x);
@@ -424,8 +434,9 @@ export class AppComponent implements OnInit {
     this.director.minuteTick();
     this.ngOnInit();
   }
+
   setSelectedRange() {
-    this.rangeMode = 'range';
+    this.globals.rangeMode = 'range';
 
     const mss = this.rangeDate + ' ' + this.rangeFrom;
     const ms = moment(mss, 'YYYY-MM-DD HH:mm');
@@ -448,7 +459,7 @@ export class AppComponent implements OnInit {
   }
 
   getOffsetBulletClass() {
-    if (this.rangeMode === 'offset') {
+    if (this.globals.rangeMode === 'offset') {
       return 'show';
     } else {
       return 'hide';
@@ -456,7 +467,7 @@ export class AppComponent implements OnInit {
   }
 
   getRangeBulletClass() {
-    if (this.rangeMode !== 'offset') {
+    if (this.globals.rangeMode !== 'offset') {
       return 'show';
     } else {
       return 'hide';

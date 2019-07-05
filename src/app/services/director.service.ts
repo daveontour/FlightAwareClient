@@ -16,13 +16,6 @@ export class DirectorService {
     // Set it so the update is on the minute
     const sec = (60 - moment().second()) * 1000;
 
-    setTimeout(() => {
-      that.minuteTick();
-    }, 500);
-
-    setTimeout(() => {
-      that.minuteTick();
-    }, 2500);
 
     setTimeout(() => {
       that.minuteTick();
@@ -43,7 +36,9 @@ export class DirectorService {
   public minuteTick() {
 
 
-    this.globals.zeroTime = moment().add(this.globals.offsetFrom, 'minutes');
+    if (this.globals.rangeMode === 'offset') {
+      this.globals.zeroTime = moment().add(this.globals.offsetFrom, 'minutes');
+    }
     // Update the hour markers on the gantt
     $('.hourIndicator').css('left', '0px');
 

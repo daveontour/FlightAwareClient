@@ -1,63 +1,70 @@
 <div style="height:45px; align-items: center;display: flex; padding-left: 5px">
   <h1 style="margin: initial">Arriving Flights</h1>
 
-  <div style="margin-left:100px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px"> 
-    <span style = "width:5px"> 
-        <span [ngClass] = "getRangeBulletClass()">&bull;</span>
+  <div style="margin-left:100px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+    <span style="width:5px">
+      <span [ngClass]="getRangeBulletClass()">&bull;</span>
     </span>
     <label>Date:</label>
-  <input class = "gridinput" [(ngModel)] = "rangeDate"  style="width:100px" type="date">
-  <label >From:</label>
-  <input [ngxTimepicker]="picker" [format]="24" class = "gridinput"  [(ngModel)]='rangeFrom'>
-  <ngx-material-timepicker #picker [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
-  <label >To:</label>
- <input [ngxTimepicker]="picker2" [format]="24" class = "gridinput"  [(ngModel)]='rangeTo'>
-  <ngx-material-timepicker #picker2 [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
+    <input class="gridinput" [(ngModel)]="rangeDate" style="width:100px" type="date">
+    <label>From:</label>
+    <input [ngxTimepicker]="picker" [format]="24" class="gridinput" [(ngModel)]='rangeFrom'>
+    <ngx-material-timepicker #picker [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
+    <label>To:</label>
+    <input [ngxTimepicker]="picker2" [format]="24" class="gridinput" [(ngModel)]='rangeTo'>
+    <ngx-material-timepicker #picker2 [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
 
-  <button (click)="setSelectedRange()">Load</button>
+    <button (click)="setSelectedRange()">Load</button>
 
   </div>
 
   <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-    <span style = "width:5px"> 
-    <span [ngClass] = "getOffsetBulletClass()">&bull;</span>
+    <span style="width:5px">
+      <span [ngClass]="getOffsetBulletClass()">&bull;</span>
     </span>
     <label>Current Time</label>
 
-  <label >From:</label>
-  <select name="from" [(ngModel)]='offsetFrom'>
-    <option value="-240">-4 hours</option>
-    <option value="-180">-3 hours</option>
-    <option value="-120"selected="selected">-2 hours</option>
-    <option value="-60">-1 hour</option>
-    <option value="0">0 hour</option>
-    <option value="60">+1 hour</option>
-    <option value="120">+2 hour</option>
-    <option value="180">+3 hour</option>   
+    <label>From:</label>
+    <select name="from" [(ngModel)]='offsetFrom'>
+      <option value="-240">-4 hours</option>
+      <option value="-180">-3 hours</option>
+      <option value="-120" selected="selected">-2 hours</option>
+      <option value="-60">-1 hour</option>
+      <option value="0">0 hour</option>
+      <option value="60">+1 hour</option>
+      <option value="120">+2 hour</option>
+      <option value="180">+3 hour</option>
 
-  </select>
-  <label >To:</label>
-  <select name="to" [(ngModel)]='offsetTo' >
-    <option value="-180">-3 hours</option>
-    <option value="-120">-2 hours</option>
-    <option value="-60">-1 hour</option>
-    <option value="0">0 hour</option>
-    <option value="60">+1 hour</option>
-    <option value="120">+2 hour</option>
-    <option value="180" selected="selected">+3 hour</option>   
-    <option value="240">+4 hour</option>
-    <option value="300">+5 hour</option>
-  </select>
+    </select>
+    <label>To:</label>
+    <select name="to" [(ngModel)]='offsetTo'>
+      <option value="-180">-3 hours</option>
+      <option value="-120">-2 hours</option>
+      <option value="-60">-1 hour</option>
+      <option value="0">0 hour</option>
+      <option value="60">+1 hour</option>
+      <option value="120">+2 hour</option>
+      <option value="180" selected="selected">+3 hour</option>
+      <option value="240">+4 hour</option>
+      <option value="300">+5 hour</option>
+    </select>
 
-  <button (click)="setCurrentRange()">Load</button>
+    <button (click)="setCurrentRange()">Load</button>
 
   </div>
 
-  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px"> 
-    <label>Timescale Zoom:</label>
-  <button (click)="zoom(-1)" style='font-size: 12px'>-</button>
-  <button (click)="zoom(1)" style='font-size: 12px'>+</button>
+  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+    <input type="checkbox"  [(ngModel)]="showOnBlocks" (change) = "changeOnBlocks()" style='font-size: 9px; width:10px'/><label style="margin-left: 5px">Show On Blocks</label>
+ </div>
 
+  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+    <label>Timescale Zoom:</label>
+    <button (click)="zoom(-1)" style='font-size: 9px; width:20px'>&lt;&lt;</button>
+    <button (click)="zoom(1)" style='font-size: 9px; width:20px'>&gt;&gt;</button>
+  </div>
+
+  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+     <button (click)="refresh()" style='font-size: 9px; width:70px'>Refresh Now!</button>
   </div>
 </div>
 
@@ -67,10 +74,11 @@
   [frameworkComponents]="frameworkComponents" [animateRows]="true" [enableSorting]="true" [getRowNodeId]="getRowNodeId"
   [groupUseEntireRow]="true" (gridReady)="onGridReady($event)">
 </ag-grid-angular>
-<div style="height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">STATUS:
-  <span style="margin-left: 10px" [ngClass]="status">{{status}}</span>
-  <span style="margin-left: 10px">Update Mode:</span>
-  <span style="margin-left: 10px" [ngClass]="updateMode">{{updateMode}}</span>
-  <span style="margin-left: 10px">Last Update:</span>
-  <span style="margin-left: 10px;color:cadetblue">{{lastUpdate}}</span>
+<div style="height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+  <span style="margin-left: 10px; font-size: 11px">Status:</span>
+  <span style="margin-left: 10px; font-size: 11px" [ngClass]="status">{{status}}</span>
+  <span style="margin-left: 10px; font-size: 11px">Update Mode:</span>
+  <span style="margin-left: 10px; font-size: 11px" [ngClass]="updateMode">{{updateMode}}</span>
+  <span style="margin-left: 10px; font-size: 11px">Last Update:</span>
+  <span style="margin-left: 10px; font-size: 11px;color:cadetblue">{{lastUpdate}}</span>
 </div>

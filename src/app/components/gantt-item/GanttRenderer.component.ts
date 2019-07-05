@@ -2,6 +2,7 @@ import { GlobalsService } from '../../services/globals.service';
 import { Component, AfterViewInit } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import * as moment from 'moment';
+import * as $ from 'jquery';
 
 @Component({
     templateUrl: './gantt-item.component.html',
@@ -98,6 +99,31 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
         } catch (e) {
             console.log(this.params);
         }
+
+        // Update the hour markers on the gantt
+        $('.hourIndicator').css('left', '0px');
+
+        // // Hour markers
+        const firstHour = this.globals.zeroTime.hour();
+        const minutesLeftInFirstHour = 60 - this.globals.zeroTime.minutes();
+        const firstOffSet = minutesLeftInFirstHour * this.globals.minutesPerPixel;
+
+        let hour = firstHour + 1;
+
+        let offset = 0;
+        let i = 0;
+        do {
+            const val = hour++ % 24;
+            offset = 60 * this.globals.minutesPerPixel * i + firstOffSet;
+            const clazz = '.' + i + 'Hour';
+            $(clazz).css('left', offset + 'px');
+            i++;
+        } while (offset < 1000);
+
+        // Now Marker
+        const origin = moment().diff(this.globals.zeroTime, 'minutes');
+        const nowLeft = origin * this.globals.minutesPerPixel;
+        $('.nowIndicator').css('left', nowLeft + 'px');
     }
 
     refresh(params: any): boolean {
