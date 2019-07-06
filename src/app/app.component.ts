@@ -19,7 +19,7 @@ import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr'
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -44,6 +44,7 @@ export class AppComponent implements OnInit {
   public count = 0;
   private stompClient: any;
   private serverURL = 'http://localhost:8080/socket';
+  private serverWebRoot = 'http://localhost:8080';
   private sideBar;
   private defaultColDef;
 
@@ -57,9 +58,9 @@ export class AppComponent implements OnInit {
   public rangeTo: number;
   public rangeDate: any;
 
- public hardReset = '';
+  public hardReset = '';
 
- public showOnBlocks = true;
+  public showOnBlocks = true;
 
   public dateLoad = new Date();
   public status = 'Connecting';
@@ -87,63 +88,71 @@ export class AppComponent implements OnInit {
     private globals: GlobalsService
   ) {
 
+    const that = this;
     this.globals.offsetFrom = this.offsetFrom;
     this.columnDefs = [
       {
         headerName: 'Aircraft',
-        field: 'Movement.Arrival.Flight.FlightState.AircraftType.AircraftTypeId.AircraftTypeCode.IATA',
+        field: 'aircraft',
         width: 70,
         enableCellChangeFlash: true,
         sortable: true,
-        enableRowGroup: true
+        enableRowGroup: true,
+        hide: true
       },
       {
         headerName: 'Arrival Flight',
         children: [
-          // {
-          //   headerName: 'Arrival ID',
-          //   field: 'Movement.Arrival.Flight.FlightState.Value.FlightUniqueID',
-          //   sortable: true,
-          //   width: 150
-          // },
-          // {
-          //   headerName: 'Type',
-          //   field: 'Movement.Arrival.Flight.FlightState.Value.S__G_FlightType',
-          //   sortable: true,
-          //   width: 150,
-          //   enableRowGroup: true
-          // },
+          {
+            headerName: 'Arrival ID',
+            field: 'arrFlightID',
+            sortable: true,
+            width: 100,
+            hide: true
+          },
+          {
+            headerName: 'Type',
+            field: 'arrFlightType',
+            sortable: true,
+            width: 100,
+            enableRowGroup: true,
+            hide: true
+          },
           {
             headerName: 'Status',
-            field: 'Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText',
+            field: 'arrFlightStatus',
             sortable: true,
             width: 120,
             enableRowGroup: true,
-            filter: true
+            filter: true,
+            hide: true
           },
           {
             headerName: 'Area',
-            field: 'Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Area',
+            field: 'arrFlightArea',
             sortable: true,
-            valueGetter: AreaValueGetter,
+            //            valueGetter: AreaValueGetter,
             width: 80,
-            enableRowGroup: true
+            enableRowGroup: true,
+            hide: true
           },
           {
             headerName: 'Stand',
-            field: 'Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName',
+            field: 'arrFlightStand',
             sortable: true,
             valueGetter: StandValueGetter,
             width: 70,
-            enableRowGroup: true
+            enableRowGroup: true,
+            hide: true
           },
           {
             headerName: 'Stand Allocation',
-            field: 'Movement.Arrival.Flight.FlightState.StandSlots.StandSlot',
+            field: 'arrFlightStandAllocation',
             sortable: true,
             valueGetter: AllocationValueGetter,
             width: 150,
-            enableRowGroup: true
+            enableRowGroup: true,
+            hide: true
           },
           {
             headerName: 'Arrival Flight',
@@ -151,7 +160,9 @@ export class AppComponent implements OnInit {
             cellRendererParams: { type: 'arrival' },
             width: 100,
             enableCellChangeFlash: true,
-            sortable: true
+            field: 'arrFlightFlight',
+            sortable: true,
+            hide: true
           },
           {
             headerName: 'Call Sign',
@@ -159,21 +170,49 @@ export class AppComponent implements OnInit {
             cellRendererParams: { type: 'arrival' },
             width: 100,
             enableCellChangeFlash: true,
-            sortable: true
+            field: 'arrFlightCallSign',
+            sortable: true,
+            hide: true
           },
           {
             headerName: 'Route',
-            field: 'Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint',
+            field: 'arrFlightRoute',
             sortable: true,
             valueGetter: RouteValueGetter,
-            width: 100
+            width: 100,
+            hide: true
+          },
+          {
+            headerName: 'Origin',
+            field: 'arrFlightOrigin',
+            sortable: true,
+            valueGetter: (params) => {
+              try {
+
+                let last;
+                try {
+                  params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
+                    last = element.AirportCode.IATA;
+                  });
+                } catch (ex) {
+                  console.log('Error with Route number');
+                }
+                return that.globals.airports[last];
+              } catch (e) {
+                console.log(e);
+                return '-';
+              }
+            },
+            width: 100,
+            hide: true
           },
           {
             headerName: 'Scheduled',
             cellRenderer: 'schedTimeRenderer',
-            field: 'Movement.Arrival.Flight.FlightState.ScheduledTime.content',
+            field: 'arrFlightSched',
             sortable: true,
             width: 120,
+            hide: true,
             enableCellChangeFlash: true,
             cellRendererParams: {
               type: 'arrival'
@@ -181,11 +220,12 @@ export class AppComponent implements OnInit {
           },
           {
             headerName: 'Actual',
-            field: 'Movement.Arrival.Flight.FlightState.Value.de_G_ActualArrival',
+            field: 'arrFlightActual',
             sortable: true,
             width: 80,
             valueGetter: ActualValueGetter,
             enableCellChangeFlash: true,
+            hide: true
           },
           {
             headerName: 'Most Confident',
@@ -193,12 +233,13 @@ export class AppComponent implements OnInit {
             width: 150,
             cellRenderer: 'schedTimeRenderer',
             cellRendererParams: { type: 'mca' },
-            field: 'Movement.Arrival.Flight.FlightState.Value.de_G_MostConfidentArrivalTime',
+            field: 'arrFlightMostConfident',
             comparator: DateComparator,
             valueGetter: DateValueGetter,
             sort: 'asc',
             unSortIcon: true,
             enableCellChangeFlash: true,
+            hide: true
           },
         ]
       },
@@ -206,10 +247,11 @@ export class AppComponent implements OnInit {
         headerName: 'Stand Allocation',
         children: [
           {
-            field: 'times',
+            field: 'arrGantt',
             cellRenderer: 'ganttRenderer',
             width: 1000,
-            headerComponent: 'sortableHeaderComponent'
+            headerComponent: 'sortableHeaderComponent',
+            hide: true
           }
         ]
       }
@@ -274,34 +316,49 @@ export class AppComponent implements OnInit {
     const ws = new SockJS(this.serverURL);
     this.stompClient = Stomp.over(ws);
     // Disable console logging
-    this.stompClient.debug = () => {};
+    this.stompClient.debug = () => { };
     const that = this;
     this.stompClient.connect({}, (frame) => {
       that.status = 'Connected';
       that.director.minuteTick();
       that.stompClient.subscribe('/update', (message) => {
-        const updatedFlight = JSON.parse(message.body);
-        try {
-          updatedFlight.times = {
-            start: updatedFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
-            end: updatedFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
-          };
-        } catch (ex) {
-          updatedFlight.times = { start: '-', end: '-' };
+        let updatedFlight = JSON.parse(message.body);
+
+        if (this.checkAddRow(updatedFlight)) {
+
+          // The MCA is still in the time band
+
+          // try {
+          //   updatedFlight.times = {
+          //     start: updatedFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
+          //     end: updatedFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
+          //   };
+          // } catch (ex) {
+          //   updatedFlight.times = { start: '-', end: '-' };
+          // }
+          updatedFlight = that.transformRow(updatedFlight);
+          const itemsToUpdate = [];
+          itemsToUpdate.push(updatedFlight);
+          console.log(updatedFlight);
+          that.gridApi.updateRowData({ update: itemsToUpdate });
+        } else {
+
+          // The MCA is out side the range, so remove it.
+          const itemsToRemove = [updatedFlight];
+          that.gridApi.updateRowData({ remove: itemsToRemove });
         }
-        const itemsToUpdate = [];
-        itemsToUpdate.push(updatedFlight);
-        console.log(updatedFlight);
-        that.gridApi.updateRowData({ update: itemsToUpdate });
         that.director.minuteTick();
         that.lastUpdate = moment().format('HH:mm:ss');
       });
 
       that.stompClient.subscribe('/add', (message) => {
-        const addFlight = JSON.parse(message.body);
-        const itemsToAdd = [addFlight];
-        that.gridApi.updateRowData({ add: itemsToAdd });
-        that.lastUpdate = moment().format('HH:mm:ss');
+        let addFlight = JSON.parse(message.body);
+        addFlight = that.transformRow(addFlight);
+        if (this.checkAddRow(addFlight)) {
+          const itemsToAdd = [addFlight];
+          that.gridApi.updateRowData({ add: itemsToAdd });
+          that.lastUpdate = moment().format('HH:mm:ss');
+        }
       });
 
       that.stompClient.subscribe('/delete', (message) => {
@@ -364,9 +421,9 @@ export class AppComponent implements OnInit {
     this.hardReset = '';
   }
 
-changeOnBlocks() {
-  alert(this.showOnBlocks);
-}
+  changeOnBlocks() {
+    this.ngOnInit();
+  }
 
   ngOnInit() {
     const that = this;
@@ -376,17 +433,29 @@ changeOnBlocks() {
     } catch (ex) {
       // Do Nothing
     }
+
+    this.http.get<any>(this.serverWebRoot + '/getAirports').subscribe(data => {
+      that.globals.airports = data;
+    });
+
+    this.http.get<any>(this.serverWebRoot + '/getColumns').subscribe(data => {
+      // that.gridColumnApi.setColumnsVisible(['aircraft', 'arrFlightID', 'arrFlightType', 'arrFlightStatus',
+      //   'arrFlightArea', 'arrFlightStand', 'arrFlightStandAllocation', 'arrFlightFlight', 'arrFlightCallSign',
+      //    'arrFlightArea', 'arrFligjtStand', 'arrFlightRoute', 'arrFlightOrigin', 'arrGantt', 'arrFlightMostConfident'], true);
+      that.gridColumnApi.setColumnsVisible(data.columns, true);
+    });
+
     const rowsToAdd = [];
-    this.http.get<any>('http://localhost:8080/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
+    this.http.get<any>(this.serverWebRoot + '/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
       '&timetype=mco' + that.hardReset).subscribe(data => {
         data.forEach(element => {
 
           try {
-            element.times = {
-              start: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
-              end: element.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
-            };
-            rowsToAdd.push(element);
+            element = that.transformRow(element);
+
+            if (that.checkAddRow(element)) {
+              rowsToAdd.push(element);
+            }
           } catch (ex) {
             console.log(ex);
           }
@@ -410,6 +479,64 @@ changeOnBlocks() {
     this.gridColumnApi = params.columnApi;
   }
 
+  transformRow(row: any): any {
+
+    try {
+      row.gantt = {
+        start: row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
+        end: row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
+      };
+    } catch (ex) {
+      row.times = { start: '-', end: '-' };
+    }
+
+    row.aircraft = row.Movement.Arrival.Flight.FlightState.AircraftType.AircraftTypeId.AircraftTypeCode.IATA;
+    row.arrFlightID = row.Movement.Arrival.Flight.FlightState.Value.FlightUniqueID;
+    row.arrFlightType = row.Movement.Arrival.Flight.FlightState.Value.S__G_FlightType;
+    row.arrFlightStatus = row.Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText;
+    try {
+      row.arrFlightArea = row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Area;
+    } catch (e) {
+      row.arrFlightArea = 'Unassigned';
+    }
+    try {
+      row.arrFlightStand = row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName;
+    } catch (e) {
+      row.arrFlightStand  = 'Unassigned';
+    }
+    try {
+      row.arrFlightStandAllocation = row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot;
+    } catch (e) {
+      row.arrFlightStandAllocation = 'Unassigned';
+    }
+    row.arrFlightFlight = {};
+    row.arrFlightCallSign = {};
+    row.arrFlightSched = row.Movement.Arrival.Flight.FlightState.ScheduledTime.content;
+    row.arrFlightRoute = row.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint;
+    row.arrFlightOrigin = row.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint;
+    row.affFlightActual = row.Movement.Arrival.Flight.FlightState.Value.de_G_ActualArrival;
+    row.arrFlightMostConfident = row.Movement.Arrival.Flight.FlightState.Value.de_G_MostConfidentArrivalTime;
+    return row;
+  }
+
+  checkAddRow(row: any): boolean {
+
+    if (row.Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText.includes('OB') && !this.showOnBlocks) {
+      return false;
+    } else {
+
+      const opTime = moment(row.Movement.Arrival.Flight.FlightState.Value.de_G_MostConfidentArrivalTime);
+      const now = moment();
+      const diff = moment().diff(opTime, 'minutes');
+
+      if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
+        return false;
+      }
+    }
+    return true;
+
+  }
+
   updateSort() {
     this.gridApi.refreshClientSideRowModel('sort');
   }
@@ -421,16 +548,8 @@ changeOnBlocks() {
   setCurrentRange() {
     this.globals.rangeMode = 'offset';
     this.globals.offsetFrom = this.offsetFrom;
+    this.globals.offsetTo = this.offsetTo;
     this.globals.zeroTime = moment().add(this.offsetFrom, 'minutes');
-    this.director.minuteTick();
-    this.ngOnInit();
-  }
-
-  zoom(d: number) {
-
-    let x = this.globals.minutesPerPixel;
-    x = x + d * (0.1 * x);
-    this.globals.minutesPerPixel = x;
     this.director.minuteTick();
     this.ngOnInit();
   }
@@ -447,15 +566,23 @@ changeOnBlocks() {
     this.offsetFrom = ms.diff(moment(), 'm');
     this.offsetTo = me.diff(moment(), 'm');
     this.globals.offsetFrom = this.offsetFrom;
+    this.globals.offsetTo = this.offsetTo;
 
-    console.log(this.offsetFrom);
-    console.log(this.offsetTo);
 
     this.globals.zeroTime = moment().add(this.offsetFrom, 'minutes');
     this.director.minuteTick();
 
     this.ngOnInit();
 
+  }
+
+  zoom(d: number) {
+
+    let x = this.globals.minutesPerPixel;
+    x = x + d * (0.1 * x);
+    this.globals.minutesPerPixel = x;
+    this.director.minuteTick();
+    this.ngOnInit();
   }
 
   getOffsetBulletClass() {
@@ -551,3 +678,4 @@ function RouteValueGetter(params) {
     return '-';
   }
 }
+

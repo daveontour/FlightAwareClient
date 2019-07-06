@@ -1,11 +1,14 @@
 .ganttItem {
   position: absolute;
   background-color: green;
-  height: 19px;
-  top:2px;
+  height: 17px;
+  top:3px;
   display: flex;
   align-items: center;
   z-index: 63000;
+  border-radius: 4px;
+  padding-left: 5px;
+  font-size: 10px;
   }
 
   .SH {

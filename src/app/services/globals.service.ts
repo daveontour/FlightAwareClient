@@ -10,6 +10,8 @@ export class GlobalsService {
   public zeroTime = moment().subtract(120, 'm');
   public rangeMode = 'offset';
   public offsetFrom: number;
+  public offsetTo: number;
+  public airports: any;
 
   constructor() { }
 }
