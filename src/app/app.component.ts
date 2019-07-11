@@ -19,7 +19,7 @@ import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr'
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -43,8 +43,6 @@ export class AppComponent implements OnInit {
   private gridColumnApi: any;
   public count = 0;
   private stompClient: any;
-  private serverURL = 'http://localhost:8080/socket';
-  private serverWebRoot = 'http://localhost:8080';
   public  sideBar;
   public defaultColDef;
 
@@ -326,7 +324,7 @@ export class AppComponent implements OnInit {
 
 
   initializeWebSocketConnection() {
-    const ws = new SockJS(this.serverURL);
+    const ws = new SockJS(this.globals.serverURL);
 
     if (typeof (this.stompClient) !== 'undefined') {
       this.stompClient.disconnect();
@@ -439,7 +437,7 @@ export class AppComponent implements OnInit {
   loadData() {
     const that = this;
     const rowsToAdd = [];
-    this.http.get<any>(this.serverWebRoot + '/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
+    this.http.get<any>(this.globals.serverWebRoot + '/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
       '&timetype=mco' + that.hardReset).subscribe(data => {
         data.forEach(element => {
 
@@ -479,11 +477,11 @@ export class AppComponent implements OnInit {
       // Do Nothing
     }
 
-    this.http.get<any>(this.serverWebRoot + '/getAirports').subscribe(data => {
+    this.http.get<any>(this.globals.serverWebRoot + '/getAirports').subscribe(data => {
       that.globals.airports = data;
     });
 
-    this.http.get<any>(this.serverWebRoot + '/getColumns').subscribe(data => {
+    this.http.get<any>(this.globals.serverWebRoot + '/getColumns').subscribe(data => {
       that.gridColumnApi.setColumnsVisible(data.columns, true);
     });
 
