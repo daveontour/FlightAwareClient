@@ -34,22 +34,22 @@ AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
 export class AppComponent implements OnInit {
   title = 'app';
 
-  private frameworkComponents: any;
-  private rowData: any;
-  private columnDefs: any;
-  private context: any;
-  private getRowNodeId: any;
+  public frameworkComponents: any;
+  public rowData: any;
+  public columnDefs: any;
+  public context: any;
+  public getRowNodeId: any;
   private gridApi: any;
   private gridColumnApi: any;
   public count = 0;
   private stompClient: any;
   private serverURL = 'http://localhost:8080/socket';
   private serverWebRoot = 'http://localhost:8080';
-  private sideBar;
-  private defaultColDef;
+  public  sideBar;
+  public defaultColDef;
 
   private pollTask;
-  private reconnectTask;
+  public reconnectTask;
 
   public offsetFrom: number;
   public offsetTo: number;
