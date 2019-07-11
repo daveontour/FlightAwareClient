@@ -16,8 +16,8 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
     public res = '-';
     public start: number;
     public width: number;
-    public stand = ' ';
-    public statusText = ' ';
+
+
 
     constructor(public globals: GlobalsService) {
 
@@ -29,63 +29,26 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
     ngAfterViewInit() {
 
         try {
-            if (typeof (this.params.data.Movement.Arrival.Flight.FlightState.StandSlots) === 'undefined' ||
-                typeof (this.params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot) === 'undefined') {
+            if (this.params.data.arr.standSlotStartTime === '-') {
                 this.res = '';
                 this.start = 0;
                 this.width = 0;
             } else {
+                const s = moment(this.params.data.arr.standSlotStartTime);
+                const e = moment(this.params.data.arr.standSlotEndTime);
 
-                const s = moment(this.params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime);
-                const e = moment(this.params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime);
-
-                this.res = '-';
-                try {
-
-                    this.res = this.params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName;
-                } catch (ex) {
+                this.res = this.params.data.arr.standExternalName;
+                if (this.res === 'Unassigned') {
                     this.res = '-';
                 }
+                this.res = this.res + ' / ' + this.params.data.arr.aircraftTypeIATA;
+                this.res = this.res + ' / ' + this.params.data.arr.S__G_CallSign;
+                this.res = this.res + ' / ' + this.params.data.arr.route;
 
-                this.res = this.res + ' / ' +
-                    this.params.data.Movement.Arrival.Flight.FlightState.AircraftType.AircraftTypeId.AircraftTypeCode.IATA;
-
-                let flightNum = '';
-                try {
-                    flightNum = this.params.data.Movement.Arrival.Flight.FlightId.AirlineDesignator.IATA +
-                        this.params.data.Movement.Arrival.Flight.FlightId.FlightNumber.content;
-                } catch (ex) {
-                    console.log('Error with Flight number');
-                }
-
-                this.res = this.res + ' / ' + flightNum;
-
-                let route = '';
-                try {
-
-                    this.params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
-                        route = route + element.AirportCode.IATA + ', ';
-                    });
-
-                } catch (ex) {
-                    console.log('Error with Route number');
-                }
-
-                this.res = this.res + ' / ' + route.substring(0, route.length - 2);
-
-                const now = moment();
                 const minutePerPixel = this.globals.minutesPerPixel;
 
                 const s1 = s.diff(this.globals.zeroTime, 'minutes');
                 const stay = e.diff(s, 'minutes');
-
-                try {
-                    this.stand = this.params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName;
-                } catch (e) {
-                    this.stand = 'Unassigned';
-                }
-
-                this.statusText = this.params.data.Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText;
 
                 if (s1 < 0) {
                     this.start = 0;
@@ -134,14 +97,19 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
 
     getClass() {
 
-        if (this.stand.startsWith('Unassigned')) {
+        if (this.params.data.arr.standName.startsWith('Unassigned')) {
             return 'Unassigned ganttItem';
+        } else {
+        return 'ganttItem';
         }
-        if (this.statusText.startsWith('SH')) {
-            return 'SH ganttItem';
-        }
-        if (this.statusText.startsWith('OB')) {
-            return 'OB ganttItem';
-        }
+        // if (this.stand.startsWith('Unassigned')) {
+        //     return 'Unassigned ganttItem';
+        // }
+        // if (this.statusText.startsWith('SH')) {
+        //     return 'SH ganttItem';
+        // }
+        // if (this.statusText.startsWith('OB')) {
+        //     return 'OB ganttItem';
+        // }
     }
 }

@@ -51,8 +51,8 @@ export class AppComponent implements OnInit {
   private pollTask;
   private reconnectTask;
 
-  public offsetFrom = -120;
-  public offsetTo = 180;
+  public offsetFrom: number;
+  public offsetTo: number;
 
   public rangeFrom: number;
   public rangeTo: number;
@@ -89,11 +89,12 @@ export class AppComponent implements OnInit {
   ) {
 
     const that = this;
-    this.globals.offsetFrom = this.offsetFrom;
+    this.offsetFrom = this.globals.offsetFrom;
+    this.offsetTo = this.globals.offsetTo;
     this.columnDefs = [
       {
         headerName: 'Aircraft',
-        field: 'aircraft',
+        field: 'arr.aircraftTypeICAO',
         width: 70,
         enableCellChangeFlash: true,
         sortable: true,
@@ -105,14 +106,14 @@ export class AppComponent implements OnInit {
         children: [
           {
             headerName: 'Arrival ID',
-            field: 'arrFlightID',
+            field: 'arr.FlightUniqueID',
             sortable: true,
             width: 100,
             hide: true
           },
           {
             headerName: 'Type',
-            field: 'arrFlightType',
+            field: 'arr.S__G_FlightType',
             sortable: true,
             width: 100,
             enableRowGroup: true,
@@ -120,7 +121,7 @@ export class AppComponent implements OnInit {
           },
           {
             headerName: 'Status',
-            field: 'arrFlightStatus',
+            field: 'arr.S__G_FlightStatusText',
             sortable: true,
             width: 120,
             enableRowGroup: true,
@@ -129,75 +130,70 @@ export class AppComponent implements OnInit {
           },
           {
             headerName: 'Area',
-            field: 'arrFlightArea',
+            field: 'arr.standArea',
             sortable: true,
-            //            valueGetter: AreaValueGetter,
             width: 80,
             enableRowGroup: true,
             hide: true
           },
           {
             headerName: 'Stand',
-            field: 'arrFlightStand',
+            field: 'arr.standName',
             sortable: true,
-            valueGetter: StandValueGetter,
-            width: 70,
+            width: 90,
             enableRowGroup: true,
             hide: true
           },
           {
             headerName: 'Stand Allocation',
-            field: 'arrFlightStandAllocation',
+            field: 'arr.standSlotStartTime',
             sortable: true,
-            valueGetter: AllocationValueGetter,
+            valueGetter: (params) => {
+              try {
+                const s = params.data.arr.standSlotStartTime;
+                const e = params.data.arr.standSlotEndTime;
+                if (typeof s === 'undefined' || typeof e === 'undefined') {
+                  return '-';
+                }
+                return moment(s).format('HH:mm - ') + moment(e).format('HH:mm');
+              } catch (e) {
+                return '-';
+              }
+            },
             width: 150,
             enableRowGroup: true,
             hide: true
           },
           {
             headerName: 'Arrival Flight',
-            cellRenderer: 'flightRenderer',
-            cellRendererParams: { type: 'arrival' },
             width: 100,
             enableCellChangeFlash: true,
-            field: 'arrFlightFlight',
+            field: 'arr.flight',
             sortable: true,
             hide: true
           },
           {
             headerName: 'Call Sign',
-            cellRenderer: 'callSignRenderer',
-            cellRendererParams: { type: 'arrival' },
             width: 100,
             enableCellChangeFlash: true,
-            field: 'arrFlightCallSign',
+            field: 'arr.S__G_CallSign',
             sortable: true,
             hide: true
           },
           {
             headerName: 'Route',
-            field: 'arrFlightRoute',
+            field: 'arr.route',
             sortable: true,
-            valueGetter: RouteValueGetter,
             width: 100,
             hide: true
           },
           {
             headerName: 'Origin',
-            field: 'arrFlightOrigin',
+            field: 'arr.origin',
             sortable: true,
             valueGetter: (params) => {
               try {
-
-                let last;
-                try {
-                  params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
-                    last = element.AirportCode.IATA;
-                  });
-                } catch (ex) {
-                  console.log('Error with Route number');
-                }
-                return that.globals.airports[last];
+                return that.globals.airports[params.data.arr.origin];
               } catch (e) {
                 console.log(e);
                 return '-';
@@ -208,22 +204,35 @@ export class AppComponent implements OnInit {
           },
           {
             headerName: 'Scheduled',
-            cellRenderer: 'schedTimeRenderer',
-            field: 'arrFlightSched',
+            field: 'arr.scheduledTime',
+            valueGetter: (params) => {
+              try {
+                return moment(params.data.arr.scheduledTime).format('MMM DD   HH:mm');
+              } catch (ex) {
+                return params.data.arr.scheduledTime;
+              }
+            },
             sortable: true,
             width: 120,
             hide: true,
             enableCellChangeFlash: true,
-            cellRendererParams: {
-              type: 'arrival'
-            },
           },
           {
             headerName: 'Actual',
-            field: 'arrFlightActual',
+            field: 'arr.de_G_ActualArrival',
             sortable: true,
             width: 80,
-            valueGetter: ActualValueGetter,
+            valueGetter: (params) => {
+              try {
+                const v = params.data.arr.de_G_ActualArrival;
+                if (typeof v === 'undefined') {
+                  return '-';
+                }
+                return moment(v).format('HH:mm');
+              } catch (e) {
+                return '-';
+              }
+            },
             enableCellChangeFlash: true,
             hide: true
           },
@@ -231,15 +240,19 @@ export class AppComponent implements OnInit {
             headerName: 'Most Confident',
             sortable: true,
             width: 150,
-            cellRenderer: 'schedTimeRenderer',
-            cellRendererParams: { type: 'mca' },
-            field: 'arrFlightMostConfident',
+            field: 'arr.de_G_MostConfidentArrivalTime',
             comparator: DateComparator,
-            valueGetter: DateValueGetter,
+            valueGetter: (params) => {
+              try {
+                return moment(params.data.arr.de_G_MostConfidentArrivalTime).format('MMM DD   HH:mm');
+              } catch (ex) {
+                return params.data.arr.de_G_MostConfidentArrivalTime;
+              }
+            },
             sort: 'asc',
             unSortIcon: true,
             enableCellChangeFlash: true,
-            hide: true
+            hide: false
           },
         ]
       },
@@ -247,7 +260,7 @@ export class AppComponent implements OnInit {
         headerName: 'Stand Allocation',
         children: [
           {
-            field: 'arrGantt',
+            field: 'arr.gantt',
             cellRenderer: 'ganttRenderer',
             width: 1000,
             headerComponent: 'sortableHeaderComponent',
@@ -306,7 +319,7 @@ export class AppComponent implements OnInit {
 
     // tslint:disable-next-line:only-arrow-functions
     this.getRowNodeId = (data) => {
-      return data.Movement.ID;
+      return data.id;
     };
 
   }
@@ -314,6 +327,12 @@ export class AppComponent implements OnInit {
 
   initializeWebSocketConnection() {
     const ws = new SockJS(this.serverURL);
+
+    if (typeof (this.stompClient) !== 'undefined') {
+      this.stompClient.disconnect();
+    }
+
+
     this.stompClient = Stomp.over(ws);
     // Disable console logging
     this.stompClient.debug = () => { };
@@ -325,25 +344,17 @@ export class AppComponent implements OnInit {
         let updatedFlight = JSON.parse(message.body);
 
         if (this.checkAddRow(updatedFlight)) {
-
           // The MCA is still in the time band
 
-          // try {
-          //   updatedFlight.times = {
-          //     start: updatedFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
-          //     end: updatedFlight.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
-          //   };
-          // } catch (ex) {
-          //   updatedFlight.times = { start: '-', end: '-' };
-          // }
           updatedFlight = that.transformRow(updatedFlight);
           const itemsToUpdate = [];
           itemsToUpdate.push(updatedFlight);
           console.log(updatedFlight);
           that.gridApi.updateRowData({ update: itemsToUpdate });
-        } else {
 
+        } else {
           // The MCA is out side the range, so remove it.
+
           const itemsToRemove = [updatedFlight];
           that.gridApi.updateRowData({ remove: itemsToRemove });
         }
@@ -381,7 +392,7 @@ export class AppComponent implements OnInit {
 
           // Do a refresh first, just in case
           if (that.updateMode === 'Refresh') {
-            that.ngOnInit();
+            that.loadData();
           }
 
           // Set the new mode;
@@ -390,10 +401,10 @@ export class AppComponent implements OnInit {
         } else if (message.body.includes('Refresh')) {
 
           if (!that.updateMode.includes('Refresh')) {
-            that.ngOnInit();
+            that.loadData();
             that.updateMode = 'Refresh';
             that.pollTask = setInterval(() => {
-              that.ngOnInit();
+              that.loadData();
             }, 60000);
           }
         }
@@ -417,16 +428,50 @@ export class AppComponent implements OnInit {
 
   refresh() {
     this.hardReset = '&reset=true';
-    this.ngOnInit();
+    this.loadData();
     this.hardReset = '';
   }
 
   changeOnBlocks() {
-    this.ngOnInit();
+    this.loadData();
+  }
+
+  loadData() {
+    const that = this;
+    const rowsToAdd = [];
+    this.http.get<any>(this.serverWebRoot + '/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
+      '&timetype=mco' + that.hardReset).subscribe(data => {
+        data.forEach(element => {
+
+          try {
+            element = that.transformRow(element);
+
+            if (that.checkAddRow(element)) {
+              rowsToAdd.push(element);
+
+            }
+          } catch (ex) {
+            console.log(ex);
+          }
+        });
+
+        that.lastUpdate = moment().format('HH:mm:ss');
+
+        console.log(rowsToAdd);
+        that.rowData = rowsToAdd;
+      });
   }
 
   ngOnInit() {
     const that = this;
+
+    try {
+      if (typeof (this.stompClient) !== 'undefined') {
+        this.stompClient.disconnect();
+      }
+    } catch (ex) {
+      // Do Nothing
+    }
 
     try {
       this.bigRefresh.cancel();
@@ -439,32 +484,11 @@ export class AppComponent implements OnInit {
     });
 
     this.http.get<any>(this.serverWebRoot + '/getColumns').subscribe(data => {
-      // that.gridColumnApi.setColumnsVisible(['aircraft', 'arrFlightID', 'arrFlightType', 'arrFlightStatus',
-      //   'arrFlightArea', 'arrFlightStand', 'arrFlightStandAllocation', 'arrFlightFlight', 'arrFlightCallSign',
-      //    'arrFlightArea', 'arrFligjtStand', 'arrFlightRoute', 'arrFlightOrigin', 'arrGantt', 'arrFlightMostConfident'], true);
       that.gridColumnApi.setColumnsVisible(data.columns, true);
     });
 
-    const rowsToAdd = [];
-    this.http.get<any>(this.serverWebRoot + '/getMovements?from=' + that.offsetFrom + '&to=' + that.offsetTo +
-      '&timetype=mco' + that.hardReset).subscribe(data => {
-        data.forEach(element => {
+    this.loadData();
 
-          try {
-            element = that.transformRow(element);
-
-            if (that.checkAddRow(element)) {
-              rowsToAdd.push(element);
-            }
-          } catch (ex) {
-            console.log(ex);
-          }
-        });
-
-        that.lastUpdate = moment().format('HH:mm:ss');
-
-        that.rowData = rowsToAdd;
-      });
 
     this.initializeWebSocketConnection();
 
@@ -480,59 +504,27 @@ export class AppComponent implements OnInit {
   }
 
   transformRow(row: any): any {
-
-    try {
-      row.gantt = {
-        start: row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime,
-        end: row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime,
-      };
-    } catch (ex) {
-      row.times = { start: '-', end: '-' };
-    }
-
-    row.aircraft = row.Movement.Arrival.Flight.FlightState.AircraftType.AircraftTypeId.AircraftTypeCode.IATA;
-    row.arrFlightID = row.Movement.Arrival.Flight.FlightState.Value.FlightUniqueID;
-    row.arrFlightType = row.Movement.Arrival.Flight.FlightState.Value.S__G_FlightType;
-    row.arrFlightStatus = row.Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText;
-    try {
-      row.arrFlightArea = row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Area;
-    } catch (e) {
-      row.arrFlightArea = 'Unassigned';
-    }
-    try {
-      row.arrFlightStand = row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName;
-    } catch (e) {
-      row.arrFlightStand  = 'Unassigned';
-    }
-    try {
-      row.arrFlightStandAllocation = row.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot;
-    } catch (e) {
-      row.arrFlightStandAllocation = 'Unassigned';
-    }
-    row.arrFlightFlight = {};
-    row.arrFlightCallSign = {};
-    row.arrFlightSched = row.Movement.Arrival.Flight.FlightState.ScheduledTime.content;
-    row.arrFlightRoute = row.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint;
-    row.arrFlightOrigin = row.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint;
-    row.affFlightActual = row.Movement.Arrival.Flight.FlightState.Value.de_G_ActualArrival;
-    row.arrFlightMostConfident = row.Movement.Arrival.Flight.FlightState.Value.de_G_MostConfidentArrivalTime;
     return row;
   }
 
   checkAddRow(row: any): boolean {
 
-    if (row.Movement.Arrival.Flight.FlightState.Value.S__G_FlightStatusText.includes('OB') && !this.showOnBlocks) {
+    if (!row.arr.flight) {
       return false;
-    } else {
-
-      const opTime = moment(row.Movement.Arrival.Flight.FlightState.Value.de_G_MostConfidentArrivalTime);
-      const now = moment();
-      const diff = moment().diff(opTime, 'minutes');
-
-      if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
-        return false;
-      }
     }
+    if (row.arr.S__G_FlightStatusText.includes('OB') && !this.showOnBlocks) {
+      return false;
+    }
+
+
+    const opTime = moment(row.arr.de_G_MostConfidentArrivalTime);
+    const diff = moment().diff(opTime, 'minutes');
+
+    if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
+      return false;
+    }
+
+
     return true;
 
   }
@@ -551,7 +543,7 @@ export class AppComponent implements OnInit {
     this.globals.offsetTo = this.offsetTo;
     this.globals.zeroTime = moment().add(this.offsetFrom, 'minutes');
     this.director.minuteTick();
-    this.ngOnInit();
+    this.loadData();
   }
 
   setSelectedRange() {
@@ -572,7 +564,7 @@ export class AppComponent implements OnInit {
     this.globals.zeroTime = moment().add(this.offsetFrom, 'minutes');
     this.director.minuteTick();
 
-    this.ngOnInit();
+    this.loadData();
 
   }
 
@@ -582,7 +574,7 @@ export class AppComponent implements OnInit {
     x = x + d * (0.1 * x);
     this.globals.minutesPerPixel = x;
     this.director.minuteTick();
-    this.ngOnInit();
+    this.loadData();
   }
 
   getOffsetBulletClass() {
@@ -605,77 +597,9 @@ export class AppComponent implements OnInit {
 }
 
 function DateComparator(date1, date2, nodeA, nodeB, isInverted) {
-
   if (moment(date2).isBefore(moment(date1))) {
     return 1;
   } else {
     return -1;
   }
 }
-function AreaValueGetter(params) {
-  try {
-    return params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Area.Value[0].content;
-  } catch (e) {
-    return 'Unassigned';
-  }
-}
-function AllocationValueGetter(params) {
-  try {
-    const s = params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.StartTime;
-    const e = params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Value.EndTime;
-
-    if (typeof s === 'undefined' || typeof e === 'undefined') {
-      return '-';
-    }
-    return moment(s).format('HH:mm - ') + moment(e).format('HH:mm');
-  } catch (e) {
-    return '-';
-  }
-}
-function ActualValueGetter(params) {
-  try {
-    const v = params.data.Movement.Arrival.Flight.FlightState.Value.de_G_ActualArrival;
-    if (typeof v === 'undefined') {
-      return '-';
-    }
-    return moment(v).format('HH:mm');
-  } catch (e) {
-    return '-';
-  }
-}
-function StandValueGetter(params) {
-  try {
-    return params.data.Movement.Arrival.Flight.FlightState.StandSlots.StandSlot.Stand.Value.ExternalName;
-  } catch (e) {
-    return 'Unassigned';
-  }
-}
-function DateValueGetter(params) {
-  try {
-    return params.data.Movement.Arrival.Flight.FlightState.Value.de_G_MostConfidentArrivalTime;
-  } catch (e) {
-    console.log('Returning Dummy Value');
-    return '1999-06-27T08:35:00';
-  }
-}
-function RouteValueGetter(params) {
-  try {
-
-    let route = '';
-
-    try {
-
-      params.data.Movement.Arrival.Flight.FlightState.Route.ViaPoints.RouteViaPoint.forEach(element => {
-        route = route + element.AirportCode.IATA + ', ';
-      });
-
-    } catch (ex) {
-      console.log('Error with Route number');
-    }
-
-    return route.substring(0, route.length - 2);
-  } catch (e) {
-    return '-';
-  }
-}
-
