@@ -1,15 +1,8 @@
 import { GlobalsService } from './services/globals.service';
-import { CallSignRendererComponent } from './components/CallSignRenderer.component';
-
 import { SortableHeaderComponent } from './components/sortable-header/sortable-header.component';
-import { GanttRendererComponent } from './components/gantt-item/GanttRenderer.component';
+import { GanttRendererComponent } from './components/gantt-item/gantt-item.component';
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FlightRendererComponent } from './components/FlightRenderer.component';
-import { SchedTimeRendererComponent } from './components/SchedTimeRenderer.component';
-import { StandSlotRendererComponent } from './components/StandSlotRenderer.component';
-import { GateSlotRendererComponent } from './components/GateSlotRenderer.component';
-import { LinkedFlightRendererComponent } from './components/LinkedFlightRenderer.component';
 import { DirectorService } from './services/director.service';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
@@ -32,8 +25,9 @@ AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'app';
 
+
+  public title = 'FlightAware';
   public frameworkComponents: any;
   public rowData: any;
   public columnDefs: any;
@@ -43,8 +37,10 @@ export class AppComponent implements OnInit {
   private gridColumnApi: any;
   public count = 0;
   private stompClient: any;
-  public  sideBar;
+  public sideBar;
   public defaultColDef;
+
+  public numRows = 0;
 
   private pollTask;
   public reconnectTask;
@@ -59,6 +55,10 @@ export class AppComponent implements OnInit {
   public hardReset = '';
 
   public showOnBlocks = true;
+  public showDateRange = true;
+
+  public arrColumns = [];
+  public depColumns = [];
 
   public dateLoad = new Date();
   public status = 'Connecting';
@@ -101,6 +101,7 @@ export class AppComponent implements OnInit {
       },
       {
         headerName: 'Arrival Flight',
+        colId: 'arr',
         children: [
           {
             headerName: 'Arrival ID',
@@ -250,7 +251,164 @@ export class AppComponent implements OnInit {
             sort: 'asc',
             unSortIcon: true,
             enableCellChangeFlash: true,
-            hide: false
+            hide: true
+          },
+        ]
+      },
+
+      {
+        headerName: 'Departure Flight',
+        colId: 'dep',
+        children: [
+          {
+            headerName: 'Departure ID',
+            field: 'dep.FlightUniqueID',
+            sortable: true,
+            width: 100,
+            hide: true
+          },
+          {
+            headerName: 'Type',
+            field: 'dep.S__G_FlightType',
+            sortable: true,
+            width: 100,
+            enableRowGroup: true,
+            hide: true
+          },
+          {
+            headerName: 'Status',
+            field: 'dep.S__G_FlightStatusText',
+            sortable: true,
+            width: 120,
+            enableRowGroup: true,
+            filter: true,
+            hide: true
+          },
+          {
+            headerName: 'Area',
+            field: 'dep.standArea',
+            sortable: true,
+            width: 80,
+            enableRowGroup: true,
+            hide: true
+          },
+          {
+            headerName: 'Stand',
+            field: 'dep.standName',
+            sortable: true,
+            width: 90,
+            enableRowGroup: true,
+            hide: true
+          },
+          {
+            headerName: 'Stand Allocation',
+            field: 'dep.standSlotStartTime',
+            sortable: true,
+            valueGetter: (params) => {
+              try {
+                const s = params.data.dep.standSlotStartTime;
+                const e = params.data.dep.standSlotEndTime;
+                if (typeof s === 'undefined' || typeof e === 'undefined') {
+                  return '-';
+                }
+                return moment(s).format('HH:mm - ') + moment(e).format('HH:mm');
+              } catch (e) {
+                return '-';
+              }
+            },
+            width: 150,
+            enableRowGroup: true,
+            hide: true
+          },
+          {
+            headerName: 'Departure Flight',
+            width: 100,
+            enableCellChangeFlash: true,
+            field: 'dep.flight',
+            sortable: true,
+            hide: true
+          },
+          {
+            headerName: 'Call Sign',
+            width: 100,
+            enableCellChangeFlash: true,
+            field: 'dep.S__G_CallSign',
+            sortable: true,
+            hide: true
+          },
+          {
+            headerName: 'Route',
+            field: 'dep.route',
+            sortable: true,
+            width: 100,
+            hide: true
+          },
+          {
+            headerName: 'Destination',
+            field: 'dep.origin',
+            sortable: true,
+            valueGetter: (params) => {
+              try {
+                return that.globals.airports[params.data.dep.origin];
+              } catch (e) {
+                console.log(e);
+                return '-';
+              }
+            },
+            width: 100,
+            hide: true
+          },
+          {
+            headerName: 'Scheduled',
+            field: 'dep.scheduledTime',
+            valueGetter: (params) => {
+              try {
+                return moment(params.data.dep.scheduledTime).format('MMM DD   HH:mm');
+              } catch (ex) {
+                return params.data.dep.scheduledTime;
+              }
+            },
+            sortable: true,
+            width: 120,
+            hide: true,
+            enableCellChangeFlash: true,
+          },
+          {
+            headerName: 'Actual',
+            field: 'dep.de_G_ActualDeparture',
+            sortable: true,
+            width: 80,
+            valueGetter: (params) => {
+              try {
+                const v = params.data.dep.de_G_ActualArrival;
+                if (typeof v === 'undefined') {
+                  return '-';
+                }
+                return moment(v).format('HH:mm');
+              } catch (e) {
+                return '-';
+              }
+            },
+            enableCellChangeFlash: true,
+            hide: true
+          },
+          {
+            headerName: 'Most Confident',
+            sortable: true,
+            width: 150,
+            field: 'dep.de_G_MostConfidentDepartureTime',
+            comparator: DateComparator,
+            valueGetter: (params) => {
+              try {
+                return moment(params.data.dep.de_G_MostConfidentDepartureTime).format('MMM DD   HH:mm');
+              } catch (ex) {
+                return params.data.dep.de_G_MostConfidentDepartureTime;
+              }
+            },
+            sort: 'asc',
+            unSortIcon: true,
+            enableCellChangeFlash: true,
+            hide: true
           },
         ]
       },
@@ -258,6 +416,7 @@ export class AppComponent implements OnInit {
         headerName: 'Stand Allocation',
         children: [
           {
+            colId: 'gantt',
             field: 'arr.gantt',
             cellRenderer: 'ganttRenderer',
             width: 1000,
@@ -305,18 +464,12 @@ export class AppComponent implements OnInit {
     };
     this.context = { componentParent: this };
     this.frameworkComponents = {
-      schedTimeRenderer: SchedTimeRendererComponent,
-      flightRenderer: FlightRendererComponent,
-      standSlotRenderer: StandSlotRendererComponent,
-      gateSlotRenderer: GateSlotRendererComponent,
-      linkedflightRenderer: LinkedFlightRendererComponent,
       ganttRenderer: GanttRendererComponent,
-      sortableHeaderComponent: SortableHeaderComponent,
-      callSignRenderer: CallSignRendererComponent
+      sortableHeaderComponent: SortableHeaderComponent
     };
 
-    // tslint:disable-next-line:only-arrow-functions
-    this.getRowNodeId = (data) => {
+
+    this.getRowNodeId = (data: any) => {
       return data.id;
     };
 
@@ -349,12 +502,13 @@ export class AppComponent implements OnInit {
           itemsToUpdate.push(updatedFlight);
           console.log(updatedFlight);
           that.gridApi.updateRowData({ update: itemsToUpdate });
-
+          that.numRows = that.gridApi.getDisplayedRowCount();
         } else {
           // The MCA is out side the range, so remove it.
 
           const itemsToRemove = [updatedFlight];
           that.gridApi.updateRowData({ remove: itemsToRemove });
+          that.numRows = that.gridApi.getDisplayedRowCount();
         }
         that.director.minuteTick();
         that.lastUpdate = moment().format('HH:mm:ss');
@@ -367,6 +521,7 @@ export class AppComponent implements OnInit {
           const itemsToAdd = [addFlight];
           that.gridApi.updateRowData({ add: itemsToAdd });
           that.lastUpdate = moment().format('HH:mm:ss');
+          that.numRows = that.gridApi.getDisplayedRowCount();
         }
       });
 
@@ -375,6 +530,8 @@ export class AppComponent implements OnInit {
         const itemsToRemove = [removeFlight];
         that.gridApi.updateRowData({ remove: itemsToRemove });
         that.lastUpdate = moment().format('HH:mm:ss');
+        that.numRows = that.gridApi.getDisplayedRowCount();
+
       });
 
       that.stompClient.subscribe('/updateMode', (message) => {
@@ -457,6 +614,7 @@ export class AppComponent implements OnInit {
 
         console.log(rowsToAdd);
         that.rowData = rowsToAdd;
+        that.numRows = rowsToAdd.length;
       });
   }
 
@@ -482,13 +640,22 @@ export class AppComponent implements OnInit {
     });
 
     this.http.get<any>(this.globals.serverWebRoot + '/getColumns').subscribe(data => {
-      that.gridColumnApi.setColumnsVisible(data.columns, true);
+      that.arrColumns = data.arrColumns;
+      that.depColumns = data.depColumns;
     });
 
-    this.loadData();
-
-
-    this.initializeWebSocketConnection();
+    this.http.get<any>(this.globals.serverWebRoot + '/getClientConfig').subscribe(data => {
+      that.title = data.title;
+      that.globals.displayMode = data.displayMode;
+      that.displayModeChangeCallback(false);
+      this.showDateRange = data.showDateRange;
+      that.loadData();
+      that.initializeWebSocketConnection();
+      // Do  a refresh every 5 minutes
+      that.bigRefresh = setTimeout(() => {
+        that.ngOnInit();
+      }, 5 * 60000);
+    });
 
     // Do  a refresh every 5 minutes
     this.bigRefresh = setTimeout(() => {
@@ -505,22 +672,87 @@ export class AppComponent implements OnInit {
     return row;
   }
 
+  displayModeChangeCallback(loadData = true) {
+    if (loadData) {
+      this.loadData();
+    }
+    if (this.globals.displayMode === 'DEP') {
+      this.gridColumnApi.setColumnsVisible(this.arrColumns, false);
+      this.gridColumnApi.setColumnsVisible(this.depColumns, true);
+    }
+    if (this.globals.displayMode === 'ARR') {
+      this.gridColumnApi.setColumnsVisible(this.depColumns, false);
+      this.gridColumnApi.setColumnsVisible(this.arrColumns, true);
+    }
+    if (this.globals.displayMode === 'BOTH') {
+      this.gridColumnApi.setColumnsVisible(this.depColumns, true);
+      this.gridColumnApi.setColumnsVisible(this.arrColumns, true);
+    }
+  }
+
   checkAddRow(row: any): boolean {
 
-    if (!row.arr.flight) {
+    if (!row.arr.flight && this.globals.displayMode === 'ARR') {
       return false;
     }
-    if (row.arr.S__G_FlightStatusText.includes('OB') && !this.showOnBlocks) {
+    if (!row.dep.flight && this.globals.displayMode === 'DEP') {
+      return false;
+    }
+    if (row.arr.S__G_FlightStatusText.includes('OB') && !this.showOnBlocks && this.globals.displayMode === 'ARR') {
       return false;
     }
 
 
-    const opTime = moment(row.arr.de_G_MostConfidentArrivalTime);
-    const diff = opTime.diff(moment(), 'minutes');
 
-//    console.log(moment().format('HH:mm') + ' ' + opTime.format('HH:mm') + ' ' + diff);
-    if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
-      return false;
+    if (this.globals.displayMode === 'ARR') {
+      const opArrTime = moment(row.arr.de_G_MostConfidentArrivalTime);
+      const diff = opArrTime.diff(moment(), 'minutes');
+      if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
+        return false;
+      }
+    }
+
+    if (this.globals.displayMode === 'DEP') {
+      const opDepTime = moment(row.arr.de_G_MostConfidentDepartureTime);
+      const diff = opDepTime.diff(moment(), 'minutes');
+      if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
+        return false;
+      }
+    }
+
+    if (this.globals.displayMode === 'BOTH') {
+
+      let arrInRange = false;
+      let depInRange = false;
+
+      if (!row.arr.flight) {
+        arrInRange = false;
+      } else {
+        const opArrTime = moment(row.arr.de_G_MostConfidentArrivalTime);
+        const diff = opArrTime.diff(moment(), 'minutes');
+        if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
+          arrInRange =  false;
+        } else {
+          arrInRange = true;
+        }
+      }
+
+      if (!row.dep.flight) {
+        depInRange = false;
+      } else {
+        const opDepTime = moment(row.arr.de_G_MostConfidentDepartureTime);
+        const diff = opDepTime.diff(moment(), 'minutes');
+        if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
+          depInRange =  false;
+        } else {
+          depInRange = true;
+        }
+      }
+
+      if (!arrInRange && !depInRange) {
+        return false;
+      }
+
     }
 
 
@@ -573,7 +805,6 @@ export class AppComponent implements OnInit {
     x = x + d * (0.1 * x);
     this.globals.minutesPerPixel = x;
     this.director.minuteTick();
-    this.loadData();
   }
 
   getOffsetBulletClass() {

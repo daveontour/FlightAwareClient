@@ -23,14 +23,6 @@ export class DirectorService {
         that.minuteTick();
       }, 60000);
     }, sec);
-
-
-    // setInterval(() => {
-    //   if (this.globals.rangeMode === 'offet') {
-    //     that.globals.zeroTime = moment().subtract(90, 'm');
-    //   }
-    //   that.minuteTick();
-    // }, 5 * 60000);
   }
 
   public minuteTick() {

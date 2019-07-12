@@ -14,6 +14,7 @@ export class GlobalsService {
   public airports: any;
   public serverURL = 'http://localhost:8080/socket';
   public serverWebRoot = 'http://localhost:8080';
+  public displayMode = 'ARR';
 
   constructor() { }
 }

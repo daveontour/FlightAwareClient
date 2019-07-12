@@ -33,7 +33,8 @@
   <div class="22Hour hourIndicator">&nbsp;</div>
   <div class="23Hour hourIndicator">&nbsp;</div>
  
-  <div [ngClass] = "getClass()" [ngStyle]="{'left.px':start, 'width.px':width}">{{res}}</div>
+  <div *ngIf = "globals.displayMode !== 'DEP' && params.data.arr.flight" [ngClass] = "getClassArr()" [ngStyle]="{'left.px':start, 'width.px':width}">{{res}}</div>
+  <div *ngIf = "globals.displayMode !== 'ARR' && params.data.dep.flight" [ngClass] = "getClassDep()" [ngStyle]="{'left.px':dstart, 'width.px':dwidth}">{{dres}}</div>
  
    <div class="nowIndicator">&nbsp;</div>
   </div>

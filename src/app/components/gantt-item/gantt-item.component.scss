@@ -1,8 +1,8 @@
-.ganttItem {
+.ganttItemArr {
   position: absolute;
   background-color: green;
-  height: 17px;
-  top:3px;
+  height: 10px;
+  top:1px;
   display: flex;
   align-items: center;
   z-index: 63000;
@@ -10,7 +10,23 @@
   padding-left: 5px;
   font-size: 10px;
   }
+  .ganttItemDep {
+    position: absolute;
+    background-color: green;
+    height: 10px;
+    top:13px;
+    display: flex;
+    align-items: center;
+    z-index: 63000;
+    border-radius: 4px;
+    padding-left: 5px;
+    font-size: 10px;
+    }
 
+   .single {
+    height: 17px;
+    top: 3px;
+   } 
   .SH {
     background-color: blueviolet
   }
@@ -19,8 +35,11 @@
     background-color: green;
   }
 
-  .Unassigned {
-    background: red;
+  .arrUnassigned {
+    background: rgb(206, 101, 101);
+  }
+  .depUnassigned {
+    background: rgb(199, 22, 22);
   }
 
   .nowIndicator {
