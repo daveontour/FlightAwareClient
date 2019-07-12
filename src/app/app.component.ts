@@ -83,7 +83,7 @@ export class AppComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private director: DirectorService,
-    private globals: GlobalsService
+    public globals: GlobalsService
   ) {
 
     const that = this;
