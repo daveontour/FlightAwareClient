@@ -516,8 +516,9 @@ export class AppComponent implements OnInit {
 
 
     const opTime = moment(row.arr.de_G_MostConfidentArrivalTime);
-    const diff = moment().diff(opTime, 'minutes');
+    const diff = opTime.diff(moment(), 'minutes');
 
+//    console.log(moment().format('HH:mm') + ' ' + opTime.format('HH:mm') + ' ' + diff);
     if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
       return false;
     }
