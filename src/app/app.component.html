@@ -83,7 +83,7 @@
 <ag-grid-angular #agGrid style="width: 100%; height: calc(100vh - 65px);" id="myGrid" class="ag-theme-balham-dark"
   [rowData]="rowData" [sideBar]="sideBar" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
   [frameworkComponents]="frameworkComponents" [animateRows]="true" [enableSorting]="true" [getRowNodeId]="getRowNodeId"
-  [groupUseEntireRow]="true" [suppressCellSelection]="true" [rowSelection] = "single" (gridReady)="onGridReady($event)" (rowClicked) = "rowClicked($event)">
+  [groupUseEntireRow]="true" [suppressCellSelection]="true" (gridReady)="onGridReady($event)" (rowClicked) = "rowClicked($event)">
 </ag-grid-angular>
 <div style="height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
   <span style="margin-left: 10px; font-size: 11px">Status:</span>
