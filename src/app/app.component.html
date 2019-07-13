@@ -2,7 +2,7 @@
   <h1 style="margin: initial">{{title}}</h1>
 
 
-  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+  <div *ngIf = 'enableDisplaySwitcher' style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
 
     <select name="displayMode" [(ngModel)]='globals.displayMode' (ngModelChange) = "displayModeChangeCallback()">
       <option value="ARR">Arrivals</option>
@@ -83,7 +83,7 @@
 <ag-grid-angular #agGrid style="width: 100%; height: calc(100vh - 65px);" id="myGrid" class="ag-theme-balham-dark"
   [rowData]="rowData" [sideBar]="sideBar" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
   [frameworkComponents]="frameworkComponents" [animateRows]="true" [enableSorting]="true" [getRowNodeId]="getRowNodeId"
-  [groupUseEntireRow]="true" (gridReady)="onGridReady($event)">
+  [groupUseEntireRow]="true" [suppressCellSelection]="true" [rowSelection] = "single" (gridReady)="onGridReady($event)" (rowClicked) = "rowClicked($event)">
 </ag-grid-angular>
 <div style="height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
   <span style="margin-left: 10px; font-size: 11px">Status:</span>
@@ -94,3 +94,10 @@
   <span style="margin-left: 10px; font-size: 11px;color:cadetblue">{{lastUpdate}}</span>
   <span style="margin-left: 10px; font-size: 11px">Rows:</span>
   <span style="margin-left: 10px; font-size: 11px;color:cadetblue">{{numRows}}</span></div>
+
+ 
+    <!-- Hidden forms form submission and downloading  -->
+
+    <form id="downloadxmlform" class="d-none" method="post" target="_self">
+      <input type="hidden" name="mvtID" />
+    </form>

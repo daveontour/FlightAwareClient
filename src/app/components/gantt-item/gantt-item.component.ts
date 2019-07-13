@@ -22,6 +22,9 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
     public dstart: number;
     public dwidth: number;
 
+    public arrMCApx: number;
+    public depMCDpx: number;
+
     constructor(public globals: GlobalsService, public messenger: MessengerService) {
 
         const that = this;
@@ -99,6 +102,9 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
                         this.start = s1 * minutePerPixel;
                         this.width = stay * minutePerPixel;
                     }
+
+                    const s2 = moment(this.params.data.arr.de_G_MostConfidentArrivalTime).diff(this.globals.zeroTime, 'minutes');
+                    this.arrMCApx = s2 * minutePerPixel;
                 }
 
             } catch (e) {
@@ -140,6 +146,9 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
                         this.dstart = s1 * minutePerPixel;
                         this.dwidth = stay * minutePerPixel;
                     }
+                    const s2 = moment(this.params.data.dep.de_G_MostConfidentDepartureTime).diff(this.globals.zeroTime, 'minutes');
+                    this.depMCDpx = s2 * minutePerPixel;
+ 
                 }
 
             } catch (e) {

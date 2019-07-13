@@ -9,10 +9,11 @@ import * as SockJS from 'sockjs-client';
 import * as moment from 'moment';
 
 import AbstractXHRObject from 'sockjs-client/lib/transport/browser/abstract-xhr';
+import * as $ from 'jquery';
 
 const _start = AbstractXHRObject.prototype._start;
 
-AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
+AbstractXHRObject.prototype._start = function (method, url, payload, opts) {
   if (!opts) {
     opts = { noCredentials: true };
   }
@@ -56,6 +57,9 @@ export class AppComponent implements OnInit {
 
   public showOnBlocks = true;
   public showDateRange = true;
+  public enableDisplaySwitcher = false;
+  public altColumnLayout = false;
+  public downloadOnClick = false;
 
   public arrColumns = [];
   public depColumns = [];
@@ -93,11 +97,11 @@ export class AppComponent implements OnInit {
       {
         headerName: 'Aircraft',
         field: 'arr.aircraftTypeICAO',
-        width: 70,
+        width: 100,
         enableCellChangeFlash: true,
         sortable: true,
         enableRowGroup: true,
-        hide: true
+        hide: false
       },
       {
         headerName: 'Arrival Flight',
@@ -236,7 +240,7 @@ export class AppComponent implements OnInit {
             hide: true
           },
           {
-            headerName: 'Most Confident',
+            headerName: 'MC Arrival',
             sortable: true,
             width: 150,
             field: 'arr.de_G_MostConfidentArrivalTime',
@@ -393,7 +397,7 @@ export class AppComponent implements OnInit {
             hide: true
           },
           {
-            headerName: 'Most Confident',
+            headerName: 'MC Departure',
             sortable: true,
             width: 150,
             field: 'dep.de_G_MostConfidentDepartureTime',
@@ -618,6 +622,13 @@ export class AppComponent implements OnInit {
       });
   }
 
+  rowClicked(event) {
+    if (this.downloadOnClick) {
+      $('input[name="mvtID"]').val(event.data.id);
+      $('#downloadxmlform').attr('action', this.globals.serverWebRoot + '/getMovement');
+      $('#downloadxmlform').submit();
+    }
+  }
   ngOnInit() {
     const that = this;
 
@@ -645,8 +656,12 @@ export class AppComponent implements OnInit {
     });
 
     this.http.get<any>(this.globals.serverWebRoot + '/getClientConfig').subscribe(data => {
+
       that.title = data.title;
       that.globals.displayMode = data.displayMode;
+      that.enableDisplaySwitcher = data.enableDisplaySwitcher;
+      that.altColumnLayout = data.altColumnLayout;
+      that.downloadOnClick = data.downloadOnClick;
       that.displayModeChangeCallback(false);
       this.showDateRange = data.showDateRange;
       that.loadData();
@@ -676,17 +691,29 @@ export class AppComponent implements OnInit {
     if (loadData) {
       this.loadData();
     }
+    if (this.altColumnLayout) {
+      this.gridColumnApi.moveColumn('gantt', 14);
+    }
     if (this.globals.displayMode === 'DEP') {
       this.gridColumnApi.setColumnsVisible(this.arrColumns, false);
       this.gridColumnApi.setColumnsVisible(this.depColumns, true);
+      const sort = [{ colId: 'dep.de_G_MostConfidentDepartureTime', sort: 'asc' },
+      { colId: 'arr.de_G_MostConfidentArrivalTime', sort: 'asc' }];
+      this.gridApi.setSortModel(sort);
     }
     if (this.globals.displayMode === 'ARR') {
       this.gridColumnApi.setColumnsVisible(this.depColumns, false);
       this.gridColumnApi.setColumnsVisible(this.arrColumns, true);
+      const sort = [{ colId: 'arr.de_G_MostConfidentArrivalTime', sort: 'asc' },
+      { colId: 'dep.de_G_MostConfidentDepartureTime', sort: 'asc' }];
+      this.gridApi.setSortModel(sort);
     }
     if (this.globals.displayMode === 'BOTH') {
       this.gridColumnApi.setColumnsVisible(this.depColumns, true);
       this.gridColumnApi.setColumnsVisible(this.arrColumns, true);
+      const sort = [{ colId: 'arr.de_G_MostConfidentArrivalTime', sort: 'asc' },
+      { colId: 'dep.de_G_MostConfidentDepartureTime', sort: 'asc' }];
+      this.gridApi.setSortModel(sort);
     }
   }
 
@@ -731,7 +758,7 @@ export class AppComponent implements OnInit {
         const opArrTime = moment(row.arr.de_G_MostConfidentArrivalTime);
         const diff = opArrTime.diff(moment(), 'minutes');
         if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
-          arrInRange =  false;
+          arrInRange = false;
         } else {
           arrInRange = true;
         }
@@ -743,7 +770,7 @@ export class AppComponent implements OnInit {
         const opDepTime = moment(row.arr.de_G_MostConfidentDepartureTime);
         const diff = opDepTime.diff(moment(), 'minutes');
         if (diff < this.globals.offsetFrom || diff > this.globals.offsetTo) {
-          depInRange =  false;
+          depInRange = false;
         } else {
           depInRange = true;
         }
