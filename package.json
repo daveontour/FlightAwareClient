@@ -25,7 +25,7 @@
     "ag-grid-angular": "^21.0.1",
     "ag-grid-community": "^21.0.1",
     "ag-grid-enterprise": "^21.0.1",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "moment": "^2.24.0",
     "net": "^1.0.2",
     "ng-pick-datetime": "^7.0.0",
