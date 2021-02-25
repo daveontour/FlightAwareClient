@@ -52,8 +52,8 @@ export class SortableHeaderComponent implements OnDestroy, IHeaderAngularComp, A
     const factory = this.resolver.resolveComponentFactory(SortableHeaderTimeMarkerComponent);
 
     // Time for the start of the time interval
-    const zeroMarker = this.markersPt.createComponent(factory).instance;
-    zeroMarker.setInput(0, this.globals.zeroTime.format('HH:mm'), true);
+   // const zeroMarker = this.markersPt.createComponent(factory).instance;
+   // zeroMarker.setInput(0, this.globals.zeroTime.format('HH:mm'), true);
 
     // Current Time Marker
     const nowMinutes = moment().diff(this.globals.zeroTime, 'minutes');

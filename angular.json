@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "TrackGrid": {
+    "LVIUI": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/TrackGrid",
+            "outputPath": "dist/LVIUI",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -30,7 +30,9 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/jquery/dist/jquery.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -62,18 +64,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "TrackGrid:build"
+            "browserTarget": "LVIUI:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "TrackGrid:build:production"
+              "browserTarget": "LVIUI:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "TrackGrid:build"
+            "browserTarget": "LVIUI:build"
           }
         },
         "test": {
@@ -110,15 +112,15 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "TrackGrid:serve"
+            "devServerTarget": "LVIUI:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "TrackGrid:serve:production"
+              "devServerTarget": "LVIUI:serve:production"
             }
           }
         }
       }
     }},
-  "defaultProject": "TrackGrid"
+  "defaultProject": "LVIUI"
 }

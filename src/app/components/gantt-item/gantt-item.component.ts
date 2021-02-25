@@ -1,6 +1,6 @@
 import { MessengerService } from 'src/app/services/messenger.service';
 import { GlobalsService } from '../../services/globals.service';
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, HostListener, NgZone } from '@angular/core';
 import { ICellRendererAngularComp } from 'ag-grid-angular';
 import * as moment from 'moment';
 import * as $ from 'jquery';
@@ -10,20 +10,15 @@ import * as $ from 'jquery';
     styleUrls: ['./gantt-item.component.scss']
 })
 export class GanttRendererComponent implements ICellRendererAngularComp, AfterViewInit {
-    public params: any;
+    public flights: any;
     public html: any;
 
+    public zone: NgZone;
+    public res: string[] = [];
+    public start: number[] = [];
+    public width: number[] = [];
+    public record: any[] = [];
 
-    public res = '-';
-    public start: number;
-    public width: number;
-
-    public dres = '-';
-    public dstart: number;
-    public dwidth: number;
-
-    public arrMCApx: number;
-    public depMCDpx: number;
 
     constructor(public globals: GlobalsService, public messenger: MessengerService) {
 
@@ -36,7 +31,12 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
 
     }
     agInit(params: any): void {
-        this.params = params;
+
+        try {
+        this.flights = params.data.assignments.flights;
+        } catch (Exception){
+            this.flights = null;
+        }
     }
 
     ngAfterViewInit() {
@@ -72,92 +72,43 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
     calcBarParams() {
         const minutePerPixel = this.globals.minutesPerPixel;
 
-        // Arrival or Both
-        if (this.globals.displayMode !== 'DEP') {
-            try {
-                if (this.params.data.arr.standSlotStartTime === '-') {
-                    this.res = '';
-                    this.start = 0;
-                    this.width = 0;
-                } else {
-                    const s = moment(this.params.data.arr.standSlotStartTime);
-                    const e = moment(this.params.data.arr.standSlotEndTime);
+        // Clear existing entries for the counter
+        this.start = [];
+        this.width = [];
+        this.res = [];
+        this.record = [];
 
-                    this.res = this.params.data.arr.standExternalName;
-                    if (this.res === 'Unassigned') {
-                        this.res = '-';
-                    }
-                    this.res = this.res + ' / ' + this.params.data.arr.aircraftTypeIATA;
-                    this.res = this.res + ' / ' + this.params.data.arr.S__G_CallSign;
-                    this.res = this.res + ' / ' + this.params.data.arr.route;
+        // Calculate the new value for each allocation
 
 
-                    const s1 = s.diff(this.globals.zeroTime, 'minutes');
-                    const stay = e.diff(s, 'minutes');
+        if (this.flights != null) {
 
-                    if (s1 < 0) {
-                        this.start = 0;
-                        this.width = stay * minutePerPixel + s1 * minutePerPixel;
-                    } else {
-                        this.start = s1 * minutePerPixel;
-                        this.width = stay * minutePerPixel;
-                    }
+            this.flights.forEach(el => {
+                try {
 
-                    const s2 = moment(this.params.data.arr.de_G_MostConfidentArrivalTime).diff(this.globals.zeroTime, 'minutes');
-                    this.arrMCApx = s2 * minutePerPixel;
-                }
+                    this.record.push(el);
 
-            } catch (e) {
-                console.log(this.params);
-            }
-        } else {
-            this.res = '';
-            this.start = 0;
-            this.width = 0;
-        }
+                    const s = moment(el.startTime);
+                    const e = moment(el.endTime);
 
-        // Departure or Both
-        if (this.globals.displayMode !== 'ARR') {
-            try {
-                if (this.params.data.dep.standSlotStartTime === '-') {
-                    this.dres = '';
-                    this.dstart = 0;
-                    this.dwidth = 0;
-                } else {
-                    const s = moment(this.params.data.dep.standSlotStartTime);
-                    const e = moment(this.params.data.dep.standSlotEndTime);
-
-                    this.dres = this.params.data.dep.standExternalName;
-                    if (this.dres === 'Unassigned') {
-                        this.dres = '-';
-                    }
-                    this.dres = this.dres + ' / ' + this.params.data.dep.aircraftTypeIATA;
-                    this.dres = this.dres + ' / ' + this.params.data.dep.S__G_CallSign;
-                    this.dres = this.dres + ' / ' + this.params.data.dep.route;
+                    this.res.push(el.airline + el.flightNumber+ ' @ ' + el.scheduleTime);
 
 
                     const s1 = s.diff(this.globals.zeroTime, 'minutes');
                     const stay = e.diff(s, 'minutes');
 
                     if (s1 < 0) {
-                        this.dstart = 0;
-                        this.dwidth = stay * minutePerPixel + s1 * minutePerPixel;
+                        this.start.push(0);
+                        this.width.push(stay * minutePerPixel + s1 * minutePerPixel);
                     } else {
-                        this.dstart = s1 * minutePerPixel;
-                        this.dwidth = stay * minutePerPixel;
+                        this.start.push(s1 * minutePerPixel);
+                        this.width.push(stay * minutePerPixel);
                     }
-                    const s2 = moment(this.params.data.dep.de_G_MostConfidentDepartureTime).diff(this.globals.zeroTime, 'minutes');
-                    this.depMCDpx = s2 * minutePerPixel;
- 
-                }
 
-            } catch (e) {
-                console.log(this.params);
-            }
-        } else {
-            this.dres = '';
-            this.dstart = 0;
-            this.dwidth = 0;
+                } catch (e) {
+                    console.log(this.flights);
+                }
+            });
         }
     }
 
@@ -167,39 +118,55 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
         return true;
     }
 
-    getClassArr() {
+    getStart(index: number): number {
+        if (index >= this.start.length) {
+            return 0;
+        }
+        return this.start[index];
+    }
+    getWidth(index: number): number {
+        if (index >= this.width.length) {
+            return 0;
+        }
+        return this.width[index];
+    }
+    getRes(index: number): string {
+        if (index >= this.res.length) {
+            return '-';
+        }
+        return this.res[index];
+    }
+
+    handleContext(){
+        alert("Context menu selected");
+    }
+
+    getClassArr(index: number) {
 
         const clazz = [];
 
-        if (this.globals.displayMode === 'ARR') {
-            clazz.push('single');
+
+
+        if (index >= this.start.length) {
+            clazz.push('invisible');
+            return clazz;
         }
 
+        const record = this.record[index];
+        const e = moment(record.end);
+        const s1 = e.diff(this.globals.zeroTime, 'minutes');
 
-        if (this.params.data.arr.standName.startsWith('Unassigned')) {
-           clazz.push('arrUnassigned');
+        // The end of the allocatin is before the origin time
+        if (s1 <= 0) {
+            clazz.push('invisible');
+            return clazz;
         }
 
+        clazz.push('single');
+        clazz.push('visible');
         clazz.push('ganttItemArr');
 
         return clazz;
     }
 
-    getClassDep() {
-
-        const clazz = [];
-
-        if (this.globals.displayMode === 'DEP') {
-            clazz.push('single');
-        }
-
-
-        if (this.params.data.dep.standName.startsWith('Unassigned')) {
-           clazz.push('depUnassigned');
-        }
-
-        clazz.push('ganttItemDep');
-
-        return clazz;
-    }
 }

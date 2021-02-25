@@ -1,13 +1,5 @@
 
-<!-- <div *ngIf="this.isItem; then allocationBlock; else nowBlock"></div>
-<ng-template #allocationBlock>
-  <div class="ganttItem" [ngClass] = "getClass()" [ngStyle]="{'left.px':start, 'width.px':width}">&nbsp;<span style="margin-left: 10px">{{resource}}</span></div>
-</ng-template>
-<ng-template #nowBlock>
-  <div [ngClass] = "{'nowIndicator': !isHourMarker, 'hourIndicator':isHourMarker}"  [ngStyle]="{'left.px':start}">&nbsp;</div>
-</ng-template> -->
-
-<div style="width:100%; height:100%; position:relative; display:flex; align-items:center; border-left: solid 2px blue;" >
+<div style="width:100%; height:100%; position:relative; display:flex; align-items:center; border-left: solid 2px" >
   <div class="0Hour hourIndicator">&nbsp;</div>
   <div class="1Hour hourIndicator">&nbsp;</div>
   <div class="2Hour hourIndicator">&nbsp;</div>
@@ -32,13 +24,37 @@
   <div class="11Hour hourIndicator">&nbsp;</div>
   <div class="22Hour hourIndicator">&nbsp;</div>
   <div class="23Hour hourIndicator">&nbsp;</div>
- 
-  <div *ngIf = "globals.displayMode !== 'DEP' && params.data.arr.flight" [ngClass] = "getClassArr()" [ngStyle]="{'left.px':start, 'width.px':width}">{{res}}</div>
-  <div *ngIf = "globals.displayMode !== 'DEP' && params.data.arr.flight"  [ngStyle]="{'left.px':arrMCApx, 'position':'absolute', 'font-size.px':'20', 'color':'lime'}">&#9662;</div>
 
-  <div *ngIf = "globals.displayMode !== 'ARR' && params.data.dep.flight" [ngClass] = "getClassDep()" [ngStyle]="{'left.px':dstart, 'width.px':dwidth}">{{dres}}</div>
-  <div *ngIf = "globals.displayMode !== 'ARR' && params.data.dep.flight"  [ngStyle]="{'left.px':depMCDpx, 'position':'absolute', 'font-size.px':'20', 'color':'skyblue'}">&#9652;</div>
- 
+  <div   [ngClass] = "getClassArr(0)"  [ngStyle]="{'left.px':getStart(0), 'width.px':getWidth(0)}">{{getRes(0)}} </div>
+  <div   [ngClass] = "getClassArr(1)"  [ngStyle]="{'left.px':getStart(1), 'width.px':getWidth(1)}">{{getRes(1)}} </div> 
+  <div   [ngClass] = "getClassArr(2)"  [ngStyle]="{'left.px':getStart(2), 'width.px':getWidth(2)}">{{getRes(2)}} </div>
+  <div   [ngClass] = "getClassArr(3)"  [ngStyle]="{'left.px':getStart(3), 'width.px':getWidth(3)}">{{getRes(3)}}</div>
+  <div   [ngClass] = "getClassArr(4)"  [ngStyle]="{'left.px':getStart(4), 'width.px':getWidth(4)}">{{getRes(4)}}</div>
+  <div   [ngClass] = "getClassArr(5)"  [ngStyle]="{'left.px':getStart(5), 'width.px':getWidth(5)}">{{getRes(5)}}</div>
+  <div   [ngClass] = "getClassArr(6)"  [ngStyle]="{'left.px':getStart(6), 'width.px':getWidth(6)}">{{getRes(6)}}</div>
+  <div   [ngClass] = "getClassArr(7)"  [ngStyle]="{'left.px':getStart(7), 'width.px':getWidth(7)}">{{getRes(7)}}</div>
+  <div   [ngClass] = "getClassArr(8)"  [ngStyle]="{'left.px':getStart(8), 'width.px':getWidth(8)}">{{getRes(8)}}</div>
+  <div   [ngClass] = "getClassArr(9)"  [ngStyle]="{'left.px':getStart(9), 'width.px':getWidth(9)}">{{getRes(9)}}</div>
+  <div   [ngClass] = "getClassArr(10)"  [ngStyle]="{'left.px':getStart(10), 'width.px':getWidth(10)}">{{getRes(10)}}</div>
+  <div   [ngClass] = "getClassArr(11)"  [ngStyle]="{'left.px':getStart(11), 'width.px':getWidth(11)}">{{getRes(11)}}</div>
+  <div   [ngClass] = "getClassArr(12)"  [ngStyle]="{'left.px':getStart(12), 'width.px':getWidth(12)}">{{getRes(12)}}</div>
+  <div   [ngClass] = "getClassArr(13)"  [ngStyle]="{'left.px':getStart(13), 'width.px':getWidth(13)}">{{getRes(13)}}</div>
+  <div   [ngClass] = "getClassArr(14)"  [ngStyle]="{'left.px':getStart(14), 'width.px':getWidth(14)}">{{getRes(14)}}</div>
+  <div   [ngClass] = "getClassArr(15)"  [ngStyle]="{'left.px':getStart(15), 'width.px':getWidth(15)}">{{getRes(15)}}</div>
+  <div   [ngClass] = "getClassArr(16)"  [ngStyle]="{'left.px':getStart(16), 'width.px':getWidth(16)}">{{getRes(16)}}</div>
+  <div   [ngClass] = "getClassArr(17)"  [ngStyle]="{'left.px':getStart(17), 'width.px':getWidth(17)}">{{getRes(17)}}</div>
+  <div   [ngClass] = "getClassArr(18)"  [ngStyle]="{'left.px':getStart(18), 'width.px':getWidth(18)}">{{getRes(18)}}</div>
+  <div   [ngClass] = "getClassArr(19)"  [ngStyle]="{'left.px':getStart(19), 'width.px':getWidth(19)}">{{getRes(19)}}</div>
+  <div   [ngClass] = "getClassArr(20)"  [ngStyle]="{'left.px':getStart(20), 'width.px':getWidth(20)}">{{getRes(20)}}</div>
+  <div   [ngClass] = "getClassArr(21)"  [ngStyle]="{'left.px':getStart(21), 'width.px':getWidth(21)}">{{getRes(21)}}</div>
+  <div   [ngClass] = "getClassArr(22)"  [ngStyle]="{'left.px':getStart(22), 'width.px':getWidth(22)}">{{getRes(22)}}</div>
+  <div   [ngClass] = "getClassArr(23)"  [ngStyle]="{'left.px':getStart(23), 'width.px':getWidth(23)}">{{getRes(23)}}</div>
+  <div   [ngClass] = "getClassArr(24)"  [ngStyle]="{'left.px':getStart(24), 'width.px':getWidth(24)}">{{getRes(24)}}</div>
+  <div   [ngClass] = "getClassArr(25)"  [ngStyle]="{'left.px':getStart(25), 'width.px':getWidth(25)}">{{getRes(25)}}</div>
+  <div   [ngClass] = "getClassArr(26)"  [ngStyle]="{'left.px':getStart(26), 'width.px':getWidth(26)}">{{getRes(26)}}</div>
+  <div   [ngClass] = "getClassArr(27)"  [ngStyle]="{'left.px':getStart(27), 'width.px':getWidth(27)}">{{getRes(27)}}</div>
+  <div   [ngClass] = "getClassArr(28)"  [ngStyle]="{'left.px':getStart(28), 'width.px':getWidth(28)}">{{getRes(28)}}</div>
+  <div   [ngClass] = "getClassArr(29)"  [ngStyle]="{'left.px':getStart(29), 'width.px':getWidth(29)}">{{getRes(29)}}</div>
 
-   <div class="nowIndicator">&nbsp;</div>
+  <div class="nowIndicator">&nbsp;</div>
   </div>

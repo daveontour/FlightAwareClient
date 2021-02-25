@@ -2,26 +2,17 @@
   <h1 style="margin: initial">{{title}}</h1>
 
 
-  <div *ngIf = 'enableDisplaySwitcher' style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-
-    <select name="displayMode" [(ngModel)]='globals.displayMode' (ngModelChange) = "displayModeChangeCallback()">
-      <option value="ARR">Arrivals</option>
-      <option value="DEP">Departures</option>
-      <option value="BOTH">Arr & Dep</option>
-      </select>
-  </div>
-
   <div  *ngIf = 'showDateRange' style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
     <span style="width:5px">
       <span [ngClass]="getRangeBulletClass()">&bull;</span>
     </span>
     <label>Date:</label>
-    <input class="gridinput" [(ngModel)]="rangeDate" style="width:100px" type="date">
+    <input class="gridinput" [(ngModel)]="rangeDate" style="width:100px;background-color:white; color:black" type="date">
     <label>From:</label>
-    <input [ngxTimepicker]="picker" [format]="24" class="gridinput" [(ngModel)]='rangeFrom'>
+    <input [ngxTimepicker]="picker" [format]="24" class="gridinput" [(ngModel)]='rangeFrom' style="background-color:white; color:black">
     <ngx-material-timepicker #picker [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
     <label>To:</label>
-    <input [ngxTimepicker]="picker2" [format]="24" class="gridinput" [(ngModel)]='rangeTo'>
+    <input [ngxTimepicker]="picker2" [format]="24" class="gridinput" [(ngModel)]='rangeTo' style="background-color:white; color:black">
     <ngx-material-timepicker #picker2 [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
 
     <button (click)="setSelectedRange()">Load</button>
@@ -35,7 +26,7 @@
     <label>Current Time</label>
 
     <label>From:</label>
-    <select name="from" [(ngModel)]='offsetFrom'>
+    <select name="from" [(ngModel)]='offsetFrom' style="background-color:white; color:black">
       <option value="-240">-4 hours</option>
       <option value="-180">-3 hours</option>
       <option value="-120" selected="selected">-2 hours</option>
@@ -44,10 +35,13 @@
       <option value="60">+1 hour</option>
       <option value="120">+2 hour</option>
       <option value="180">+3 hour</option>
+      <option value="240">+4 hour</option>
+      <option value="300">+5 hour</option>
+      <option value="360">+6 hour</option>
 
     </select>
     <label>To:</label>
-    <select name="to" [(ngModel)]='offsetTo'>
+    <select name="to" [(ngModel)]='offsetTo' style="background-color:white; color:black">
       <option value="-180">-3 hours</option>
       <option value="-120">-2 hours</option>
       <option value="-60">-1 hour</option>
@@ -57,16 +51,12 @@
       <option value="180">+3 hour</option>
       <option value="240"  selected="selected">+4 hour</option>
       <option value="300">+5 hour</option>
+      <option value="360">+6 hour</option>
     </select>
 
     <button (click)="setCurrentRange()">Load</button>
 
   </div>
-
-
-  <div *ngIf = 'globals.displayMode == "ARR"' style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-    <input type="checkbox"  [(ngModel)]="showOnBlocks" (change) = "changeOnBlocks()" style='font-size: 9px; width:10px'/><label style="margin-left: 5px">Show On Blocks</label>
- </div>
 
   <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
     <label>Timescale Zoom:</label>
@@ -77,26 +67,26 @@
   <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
      <button (click)="refresh()" style='font-size: 9px; width:70px'>Refresh Now!</button>
   </div>
+  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+    <button (click)="openAddDialog()" style='font-size: 9px; width:70px'>Add Allocation</button>
+ </div>
+<div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+  <button (click)="deleteToday()" style='font-size: 9px; width:70px'>Delete Today</button>
+</div>
+ <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+  <button (click)="openFileDialog()" style='font-size: 9px; width:70px'>Upload Schedule</button>
+</div>
 </div>
 
 
-<ag-grid-angular #agGrid style="width: 100%; height: calc(100vh - 65px);" id="myGrid" class="ag-theme-balham-dark"
-  [rowData]="rowData" [sideBar]="sideBar" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef"
+<ag-grid-angular #agGrid style="width: 100%; height: calc(100vh - 45px);" id="myGrid" class="ag-theme-balham-dark"
+  [rowData]="rowData" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [getContextMenuItems]= "getContextMenuItems"
   [frameworkComponents]="frameworkComponents" [animateRows]="true" [enableSorting]="true" [getRowNodeId]="getRowNodeId"
-  [groupUseEntireRow]="true" [suppressCellSelection]="true" (gridReady)="onGridReady($event)" (rowClicked) = "rowClicked($event)">
+  [groupUseEntireRow]="true" [suppressCellSelection]="true"  (gridReady)="onGridReady($event)" >
 </ag-grid-angular>
-<div style="height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-  <span style="margin-left: 10px; font-size: 11px">Status:</span>
-  <span style="margin-left: 10px; font-size: 11px" [ngClass]="status">{{status}}</span>
-  <span style="margin-left: 10px; font-size: 11px">Update Mode:</span>
-  <span style="margin-left: 10px; font-size: 11px" [ngClass]="updateMode">{{updateMode}}</span>
-  <span style="margin-left: 10px; font-size: 11px">Last Update:</span>
-  <span style="margin-left: 10px; font-size: 11px;color:cadetblue">{{lastUpdate}}</span>
-  <span style="margin-left: 10px; font-size: 11px">Rows:</span>
-  <span style="margin-left: 10px; font-size: 11px;color:cadetblue">{{numRows}}</span></div>
-
  
-    <!-- Hidden forms form submission and downloading  -->
+
+    <!-- Hidden forms form submission and downloading   [suppressContextMenu]="true"-->
 
     <form id="downloadxmlform" class="d-none" method="post" target="_self">
       <input type="hidden" name="mvtID" />
