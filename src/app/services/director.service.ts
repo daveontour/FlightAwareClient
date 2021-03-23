@@ -16,7 +16,7 @@ export class DirectorService {
     // Set it so the update is on the minute
     const sec = (60 - moment().second()) * 1000;
 
-
+    
     setTimeout(() => {
       that.minuteTick();
       setInterval(() => {
@@ -49,7 +49,7 @@ export class DirectorService {
       const clazz = '.' + i + 'Hour';
       $(clazz).css('left', offset + 'px');
       i++;
-    } while (offset < 1000);
+    } while (offset < window.innerWidth - 100);
 
     // Now Indicator
     const origin = moment().diff(this.globals.zeroTime, 'minutes');

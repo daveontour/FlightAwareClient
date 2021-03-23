@@ -61,7 +61,7 @@ export class GanttRendererComponent implements ICellRendererAngularComp, AfterVi
             const clazz = '.' + i + 'Hour';
             $(clazz).css('left', offset + 'px');
             i++;
-        } while (offset < 1000);
+        } while (offset < window.innerWidth - 100);
 
         // Now Marker
         const origin = moment().diff(this.globals.zeroTime, 'minutes');

@@ -1,32 +1,33 @@
 <div style="height:45px; align-items: center;display: flex; padding-left: 5px">
   <h1 style="margin: initial">{{title}}</h1>
+</div>
 
-
-  <div  *ngIf = 'showDateRange' style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-    <span style="width:5px">
-      <span [ngClass]="getRangeBulletClass()">&bull;</span>
-    </span>
-    <label>Date:</label>
-    <input class="gridinput" [(ngModel)]="rangeDate" style="width:100px;background-color:white; color:black" type="date">
-    <label>From:</label>
-    <input [ngxTimepicker]="picker" [format]="24" class="gridinput" [(ngModel)]='rangeFrom' style="background-color:white; color:black">
-    <ngx-material-timepicker #picker [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
-    <label>To:</label>
-    <input [ngxTimepicker]="picker2" [format]="24" class="gridinput" [(ngModel)]='rangeTo' style="background-color:white; color:black">
-    <ngx-material-timepicker #picker2 [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
-
-    <button (click)="setSelectedRange()">Load</button>
-
+<div style="height:45px; align-items: center;display: flex; padding-left: 5px">
+  
+  <div *ngIf="showDateRange">Date
+    <select  name="modeType" id="modeType" style="height:25px;width:125px; font-size: 12px;" [(ngModel)]='selectMode' (change)='modeSelectChange()' >
+      <option value="Today" selected="selected">Today</option>
+      <option value="SelectDay">Select Day</option>
+    </select>
   </div>
 
-  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-    <span style="width:5px">
-      <span [ngClass]="getOffsetBulletClass()">&bull;</span>
-    </span>
-    <label>Current Time</label>
+  <div  *ngIf='selectMode == "SelectDay"' style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+
+    <label>Date:</label>
+    <input class="gridinput" [(ngModel)]="rangeDate"  style="height:25px;width:125px; font-size: 12px;" type="date">
+    <label>From:</label>
+    <input [ngxTimepicker]="picker" [format]="24" class="gridinput" [(ngModel)]='rangeFrom'  style="height:25px;width:90px; font-size: 12px;">
+    <ngx-material-timepicker #picker [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
+    <label>To:</label>
+    <input [ngxTimepicker]="picker2" [format]="24" class="gridinput" [(ngModel)]='rangeTo'  style="height:25px;width:90px; font-size: 12px;">
+    <ngx-material-timepicker #picker2 [ngxMaterialTimepickerTheme]="darkTheme"></ngx-material-timepicker>
+
+   </div>
+
+  <div  *ngIf='selectMode == "Today"' style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
 
     <label>From:</label>
-    <select name="from" [(ngModel)]='offsetFrom' style="background-color:white; color:black">
+    <select name="from" [(ngModel)]='offsetFrom' style="height:25px;width:100px; font-size: 12px;">
       <option value="-240">-4 hours</option>
       <option value="-180">-3 hours</option>
       <option value="-120" selected="selected">-2 hours</option>
@@ -41,7 +42,7 @@
 
     </select>
     <label>To:</label>
-    <select name="to" [(ngModel)]='offsetTo' style="background-color:white; color:black">
+    <select name="to" [(ngModel)]='offsetTo' style="height:25px;width:100px; font-size: 12px;">
       <option value="-180">-3 hours</option>
       <option value="-120">-2 hours</option>
       <option value="-60">-1 hour</option>
@@ -54,40 +55,28 @@
       <option value="360">+6 hour</option>
     </select>
 
-    <button (click)="setCurrentRange()">Load</button>
+    </div>
 
-  </div>
-
-  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-    <label>Timescale Zoom:</label>
-    <button (click)="zoom(-1)" style='font-size: 9px; width:20px; cursor: zoom-out;'>&lt;&lt;</button>
-    <button (click)="zoom(1)" style='font-size: 9px; width:20px; cursor: zoom-in;'>&gt;&gt;</button>
-  </div>
-
-  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-     <button (click)="refresh()" style='font-size: 9px; width:70px'>Refresh Now!</button>
-  </div>
-  <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-    <button (click)="openAddDialog()" style='font-size: 9px; width:70px'>Add Allocation</button>
- </div>
-<div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-  <button (click)="deleteToday()" style='font-size: 9px; width:70px'>Delete Today</button>
-</div>
- <div style="margin-left:20px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
-  <button (click)="openFileDialog()" style='font-size: 9px; width:70px'>Upload Schedule</button>
-</div>
+    <button (click)="setRange()" style="margin-left:15px;height:25px;width:60px; font-size: 12px;">Load</button>
+    
+    <button (click)="openAddDialog()" style='margin-left:50px;font-size: 12px;height:25px; width:160px'>Add Allocation</button>
+    <button (click)="openFileDialog()" style='margin-left:10px;font-size: 12px;height:25px; width:160px'>Upload Schedule</button>
 </div>
 
-
-<ag-grid-angular #agGrid style="width: 100%; height: calc(100vh - 45px);" id="myGrid" class="ag-theme-balham-dark"
+<div style="width:100%">
+<ag-grid-angular #agGrid style="width: 100%; height: calc(100vh - 125px);" id="myGrid" class="ag-theme-balham-dark"
   [rowData]="rowData" [columnDefs]="columnDefs" [defaultColDef]="defaultColDef" [getContextMenuItems]= "getContextMenuItems"
   [frameworkComponents]="frameworkComponents" [animateRows]="true" [enableSorting]="true" [getRowNodeId]="getRowNodeId"
   [groupUseEntireRow]="true" [suppressCellSelection]="true"  (gridReady)="onGridReady($event)" >
 </ag-grid-angular>
+</div>
  
 
-    <!-- Hidden forms form submission and downloading   [suppressContextMenu]="true"-->
+    <div style="height:35px;">
+      <div style="margin-right:20px;margin-top:8px;height:20px;align-items: center;display: flex; flex-direction: row;padding-left: 10px">
+        <button (click)="zoom(-1)" style='font-size: 18px; width:35px; cursor: zoom-out;'>&lt;&lt;</button>
+        <label style="font-size: 12px;">Timescale</label>
+        <button (click)="zoom(1)" style='font-size: 18px; width:35px; cursor: zoom-in;'>&gt;&gt;</button>
+      </div>
+    </div>
 
-    <form id="downloadxmlform" class="d-none" method="post" target="_self">
-      <input type="hidden" name="mvtID" />
-    </form>

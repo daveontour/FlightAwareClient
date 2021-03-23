@@ -54,6 +54,7 @@ export class AppComponent implements OnInit {
   public showOnBlocks = true;
   public showDateRange = true;
   public enableDisplaySwitcher = false;
+  public selectMode = 'Today'
 
   public resources = [];
 
@@ -91,20 +92,23 @@ export class AppComponent implements OnInit {
     this.offsetTo = this.globals.offsetTo;
     this.columnDefs = [
       {
-        headercounter: 'Counter',
+        headerName: 'Counter',
         field: 'externalName',
-        width: 100,
+        minWidth: 100,
+        maxWidth: 100,
         enableCellChangeFlash: true,
         sortable: true,
         enableRowGroup: true,
         hide: false
       },
       {
-        headercounter: 'Counter  Allocation',
+        headerName: 'Counter  Allocation',
         colId: 'gantt',
         field: 'assignments',
         cellRenderer: 'ganttRenderer',
-        width: 1000,
+        resizable: true,
+        minWidth: 500,
+        maxWidth: 3000,
         headerComponent: 'sortableHeaderComponent',
         hide: false
       }
@@ -179,6 +183,18 @@ export class AppComponent implements OnInit {
     this.loadAllocationsHTTP();
   }
 
+  modeSelectChange(): any {
+    // this.rowData = [];
+    // this.numRows = 0;
+    // if (this.selectMode === 'Monitor') {
+    //   this.globals.rangeMode = 'offset';
+    //   this.displayMode = 'Monitor';
+    //   this.setCurrentRange();
+    // } else {
+    //   this.globals.rangeMode = 'range';
+    //   this.displayMode = 'Review';
+    // }
+  }
 
   loadResourcesHTTP() {
     this.http.get<any>(this.globals.serverURL + '/getResources').subscribe(data => {
@@ -281,23 +297,35 @@ export class AppComponent implements OnInit {
     });
   }
 
+
+
   ngOnInit() {
     const that = this;
+    window.addEventListener("resize", function(e){
+      that.gridApi.sizeColumnsToFit();
+     
+    });
 
-    // // Do  a refresh every 5 minutes
-    // this.bigRefresh = setTimeout(() => {
-    //   that.ngOnInit();
-    // }, 5 * 60000);
   }
 
+ 
   onGridReady(params) {
     this.gridApi = params.api;
     this.loadData();
+    this.gridApi.sizeColumnsToFit();
   }
 
   displayModeChangeCallback(loadData = true) {
     if (loadData) {
       this.loadData();
+    }
+  }
+
+  setRange(){
+    if (this.selectMode == 'Today'){
+      this.setCurrentRange();
+    } else {
+      this.setSelectedRange();
     }
   }
 
@@ -344,14 +372,6 @@ export class AppComponent implements OnInit {
 
   getOffsetBulletClass() {
     if (this.globals.rangeMode === 'offset') {
-      return 'show';
-    } else {
-      return 'hide';
-    }
-  }
-
-  getRangeBulletClass() {
-    if (this.globals.rangeMode !== 'offset') {
       return 'show';
     } else {
       return 'hide';

@@ -78,7 +78,7 @@ export class SortableHeaderComponent implements OnDestroy, IHeaderAngularComp, A
 
       i++;
 
-    } while (offset < 1000);
+    } while (offset < window.innerWidth - 100);
   }
 
   ngOnDestroy() {
